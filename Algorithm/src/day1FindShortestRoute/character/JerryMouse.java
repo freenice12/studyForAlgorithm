@@ -53,6 +53,7 @@ public class JerryMouse implements Jerry {
 		shortestRoute = getShortestRoute();
 		saveHistory(board.getBoardMap());
 		Direction next = getDirection(shortestRoute.get(0));
+		shortestRoute.remove(board.getDoorPosition());
 		// printHistory();
 		return next;
 
@@ -200,59 +201,5 @@ public class JerryMouse implements Jerry {
 	public History getNextTurn(int index) {
 		return historyMap.get(index);
 	}
-
-	// private void printHistory() {
-	// Object[][] tempMap = new Object[GameBoard.sizeX][GameBoard.sizeY];
-	// for (Entry<Integer, History> turnEntry : historyMap
-	// .entrySet()) {
-	// History historyA = turnEntry.getValue();
-	// Map<Point, Character> his = historyA.getHistory();
-	// for (Entry<Point, Character> history : his.entrySet()) {
-	// int x = history.getKey().x;
-	// int y = history.getKey().y;
-	// // EMPTY, JERRY, DOOR, OBSTACLE
-	// switch (history.getValue().getType()) {
-	// case EMPTY:
-	// tempMap[y][x] = "O";
-	// break;
-	// case JERRY:
-	// tempMap[y][x] = "J";
-	// break;
-	// case DOOR:
-	// tempMap[y][x] = "E";
-	// break;
-	// case OBSTACLE:
-	// tempMap[y][x] = "X";
-	// break;
-	// }
-	// }
-	// StringBuffer stringBuffer = new StringBuffer();
-	// for (int i = GameBoard.sizeX - 1; 0 <= i; i--) {
-	// for (int j = 0; j < GameBoard.sizeY; j++) {
-	// stringBuffer.append(tempMap[i][j]).append(" ");
-	// }
-	// stringBuffer.append("\n");
-	// }
-	// stringBuffer.append("\n");
-	// System.out.println("==========" + turnEntry.getKey() + "========");
-	// System.out.println(stringBuffer.toString());
-	//
-	// }
-	//
-	// }
-	//
-	// private void printDistanceMap() {
-	// System.out.println();
-	// Object[][] tempMap = new Object[GameBoard.sizeX][GameBoard.sizeY];
-	// for (Entry<Point, Integer> entry : distanceMap.entrySet()) {
-	// tempMap[entry.getKey().y][entry.getKey().x] = entry.getValue();
-	// }
-	// for (int i = GameBoard.sizeY - 1; i >= 0; i --) {
-	// for (int j = 0; j< GameBoard.sizeX; j++) {
-	// System.out.print(tempMap[j][i]+"   ");
-	// }
-	// System.out.println();
-	// }
-	// }
 
 }

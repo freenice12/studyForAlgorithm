@@ -1,32 +1,35 @@
 package day1FindShortestRoute.ui;
 
 import java.awt.Point;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Device;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
-import day1FindShortestRoute.data.History;
-import day1FindShortestRoute.enums.CharacterType;
 import day1FindShortestRoute.interfaces.Character;
 
 public class GameBoardCompsite extends Composite {
 
-	private Canvas canvas;
-	private TomJerryViewer tomJerryViewer;
 
-	public GameBoardCompsite(Composite parent, TomJerryViewer tomJerryViewer) {
+	private Canvas canvas;
+	private GC gc;
+
+	public GameBoardCompsite(Composite parent) {
 		super(parent, SWT.BORDER);
-		this.tomJerryViewer = tomJerryViewer;
 		buildMapComposite();
 	}
 
 	private void buildMapComposite() {
-		canvas = new Canvas(this, SWT.NONE);
+		canvas = new Canvas(this, SWT.NO_BACKGROUND);
 		canvas.setSize(810, 810);
 
 		canvas.addPaintListener(new PaintListener() {
@@ -48,36 +51,63 @@ public class GameBoardCompsite extends Composite {
 				}
 			}
 		});
+		gc  = new GC(canvas);
 	}
+	
+	public void updateHistoryComposite(Map<Point, Character> mapStatus,
+			List<Point> shortestRoute, boolean showRoute) {
+		canvas.update();
+		this.update();
+		canvas = new Canvas(this, SWT.NO_BACKGROUND);
+		canvas.setSize(810, 810);
+		Device device = Display.getCurrent();
+		Color red = new Color(device, 255, 0, 0);
+		Color black = new Color(device, 255, 255, 255);
+		Color blue = new Color(device, 0, 0, 255);
+		
+		int maxX = 800;
+		int maxY = 800;
 
-	public void updateHistoryComposite(Map<Integer, History> history) {
-//		for (int turn = 0; turn < history.size(); turn++) {
-//			for (Entry<Point, Character> entry : history.getHistory()
-//					.entrySet()) {
-//				if (entry.getValue().getType().equals(CharacterType.EMPTY)) {
-//					continue;
-//				} else if (entry.getValue().getType()
-//						.equals(CharacterType.JERRY)) {
-//					e.gc.setBackground(display
-//							.getSystemColor(SWT.COLOR_RED));
-//					e.gc.fillOval(entry.getKey().x * 10,
-//							entry.getKey().y * 10, 10, 10);
-//				} else if (entry.getValue().getType()
-//						.equals(CharacterType.OBSTACLE)) {
-//					e.gc.setBackground(display
-//							.getSystemColor(SWT.COLOR_BLACK));
-//					e.gc.fillOval(entry.getKey().x * 10,
-//							entry.getKey().y * 10, 10, 10);
-//				} else {
-//					e.gc.setBackground(display
-//							.getSystemColor(SWT.COLOR_CYAN));
-//					e.gc.fillOval(entry.getKey().x * 10,
-//							entry.getKey().y * 10, 10, 10);
-//				}
-//
-//			}
-//
-//		}
+		gc.setForeground(new Color(device, 0, 0, 0));
+		gc.setLineWidth(1);
+
+		for (int i = 0; i <= maxX; i += 8) {
+			gc.drawLine(i, 0, i, maxY);
+		}
+
+		for (int i = 0; i <= maxX; i += 8) {
+			gc.drawLine(0, i, maxX, i);
+		}
+
+		for (Entry<Point, Character> entry : mapStatus.entrySet()) {
+			org.eclipse.swt.graphics.Point newPoint = new org.eclipse.swt.graphics.Point(entry.getKey().y, entry.getKey().x);
+			switch (entry.getValue().getType()) {
+			case EMPTY:
+				gc.setBackground(black);
+				gc.fillOval(newPoint.x * 8, newPoint.y * 8, 8, 8);
+				continue;
+			case JERRY:
+				gc.setBackground(red);
+				break;
+			case OBSTACLE:
+				gc.setBackground(new Color(device, 0, 0, 0));
+				break;
+			case DOOR:
+				gc.setBackground(blue);
+				break;
+			}
+			gc.fillOval(newPoint.x * 8, newPoint.y * 8, 8, 8);
+		}
+		
+		if (showRoute) {
+			for (Point routePoint : shortestRoute) {
+				org.eclipse.swt.graphics.Point newPoint = new org.eclipse.swt.graphics.Point(routePoint.y, routePoint.x);
+				gc.setBackground(new Color(device, 0, 255, 0));
+				gc.fillOval(newPoint.x * 8, newPoint.y * 8, 8, 8);
+			}
+		}
+		
+		canvas.redraw();
 	}
 
 }

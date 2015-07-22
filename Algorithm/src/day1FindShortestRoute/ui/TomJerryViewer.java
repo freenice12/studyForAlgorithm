@@ -1,5 +1,7 @@
 package day1FindShortestRoute.ui;
 
+import java.awt.Point;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -11,6 +13,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import day1FindShortestRoute.Player;
 import day1FindShortestRoute.data.History;
+import day1FindShortestRoute.interfaces.Character;
 
 public class TomJerryViewer {
 
@@ -37,7 +40,7 @@ public class TomJerryViewer {
 	    gridLayout.makeColumnsEqualWidth = false;
 	    mainComposite.setLayout(gridLayout);
 	    mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	    gameBoardCompsite = new GameBoardCompsite(mainComposite, this);
+	    gameBoardCompsite = new GameBoardCompsite(mainComposite);
 	    buttonsComposite = new ButtonsComposite(mainComposite, this);
 	    
 
@@ -52,8 +55,12 @@ public class TomJerryViewer {
 		display.dispose();
 	}
 
-	public void updateBoardStatus() {
-		Map<Integer, History> history = player.getHistory();
-		gameBoardCompsite.updateHistoryComposite(history);
+	public void updateBoardStatus(Map<Point, Character> mapStatus, List<Point> shortestRoute, boolean showRoute) {
+		gameBoardCompsite.updateHistoryComposite(mapStatus, shortestRoute, showRoute);
+	}
+
+	public Map<Integer, History> getHistory() {
+		
+		return player.getHistory();
 	}
 }
