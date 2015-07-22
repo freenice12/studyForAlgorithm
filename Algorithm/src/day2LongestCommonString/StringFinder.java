@@ -8,12 +8,13 @@ public class StringFinder {
 	public static void main(String[] args) {
 		String firstStr = "Please, peter go swimming!";
 		String secondStr = "I’m peter goliswi";
-//		String firstStr = "12345123jdfjdfjdfjdf";
-//		String secondStr = "s902384jdf9123 jdfj";
-//		String firstStr = "123456";
-//		String secondStr = " 23a2346";
+		// String firstStr = "123456";
+		// String secondStr = " 23a2346";
+		// String firstStr = "12345123jdfjdfjdfjdf";
+		// String secondStr = "s902384jdf9123 jdfj";
 		System.out.println(StringFinder.findLongist(firstStr, secondStr));
-		System.out.println(StringFinder.findLongistAlgorism(firstStr, secondStr));
+		System.out.println(StringFinder
+				.findLongistAlgorism(firstStr, secondStr));
 	}
 
 	public static String findLongist(String firstStr, String secondStr) {
@@ -22,41 +23,38 @@ public class StringFinder {
 		findLong(firstStr, 0, secondStr, 0, buffer, wordSet);
 		String longest = "";
 		for (String word : wordSet) {
-//			System.out.println(word);
+			// System.out.println(word);
 			if (word.length() > longest.length())
 				longest = word;
 		}
 		return longest;
 	}
-	
+
 	private static void findLong(String firstStr, int i, String secondStr,
 			int j, StringBuffer buffer, Set<String> wordSet) {
-		if (i < firstStr.length() && j < secondStr.length()) {
-			char firstChar = firstStr.charAt(i);
-			for (int index = j; index < secondStr.length(); index++) {
-				char secondChar = secondStr.charAt(index);
-				if (firstChar == secondChar) {
-					buffer.append(firstChar);
-					findLong(firstStr, i + 1, secondStr, index + 1, buffer, wordSet);
-					continue;
-				}
-				if (buffer.length() > 0) {
-					addChar(buffer, wordSet);
-					return;
-				}
+		if (firstStr.length() <= i || secondStr.length() <= j)
+			return;
+		char firstChar = firstStr.charAt(i);
+		for (int index = j; index < secondStr.length(); index++) {
+			char secondChar = secondStr.charAt(index);
+			if (firstChar == secondChar) {
+				buffer.append(firstChar);
+				findLong(firstStr, i + 1, secondStr, index + 1, buffer, wordSet);
+				continue;
 			}
 			if (buffer.length() > 0) {
 				addChar(buffer, wordSet);
+				return;
 			}
-			findLong(firstStr, i + 1, secondStr, 0, buffer, wordSet);
 		}
+		findLong(firstStr, i + 1, secondStr, 0, buffer, wordSet);
 	}
 
 	private static void addChar(StringBuffer buffer, Set<String> wordSet) {
 		wordSet.add(buffer.toString());
 		buffer.delete(0, buffer.length());
 	}
-	
+
 	public static String findLongistAlgorism(String firstStr, String secondStr) {
 		String first = firstStr.toLowerCase();
 		String second = secondStr.toLowerCase();
@@ -71,7 +69,8 @@ public class StringFinder {
 				if (matchedArrays[row][col] > matchedCounter) {
 					matchedCounter = matchedArrays[row][col];
 
-					int initMatchedCharIndex = row - matchedArrays[row][col] + 1;
+					int initMatchedCharIndex = row - matchedArrays[row][col]
+							+ 1;
 					if (matchedCounter != initMatchedCharIndex) {
 						matchedCounter = initMatchedCharIndex;
 						matchedString = new StringBuffer();
@@ -84,7 +83,7 @@ public class StringFinder {
 			}
 		}
 
-//		printMap(first, second, matchedArrays);
+		// printMap(first, second, matchedArrays);
 
 		return matchedString.toString();
 	}
@@ -111,6 +110,5 @@ public class StringFinder {
 			System.out.println();
 		}
 	}
-
 
 }
