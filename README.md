@@ -1,0 +1,2 @@
+# studyForAlgorithm
+Algorithm!
