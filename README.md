@@ -1,2 +1,2 @@
-# studyForAlgorithm
+# Study For Algorithm!
 Algorithm!
