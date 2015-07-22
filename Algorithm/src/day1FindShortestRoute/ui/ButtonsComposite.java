@@ -28,10 +28,14 @@ public class ButtonsComposite extends Composite {
 				4, true);
 		this.setLayout(gl);
 
+		final Button ppreButton = new Button(this, SWT.PUSH);
+		ppreButton.setText("<<");
 		final Button preButton = new Button(this, SWT.PUSH);
 		preButton.setText("<");
 		final Button nextButton = new Button(this, SWT.PUSH);
 		nextButton.setText(">");
+		final Button nnextButton = new Button(this, SWT.PUSH);
+		nnextButton.setText(">>");
 		final Button playButton = new Button(this, SWT.PUSH);
 		playButton.setText("Play");
 		final Button routeButton = new Button(this, SWT.PUSH);
@@ -98,6 +102,27 @@ public class ButtonsComposite extends Composite {
 				showMapStatus(turn, tomJerryViewer, history, true);
 			}
 
+		});
+		
+		ppreButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent mouseevent) {
+				super.mouseDown(mouseevent);
+				if (turn > 10 && turn < history.size()) {
+					turn = turn - 10;
+					showMapStatus(turn, tomJerryViewer, history, false);
+				}
+			}
+		});
+		nnextButton.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseDown(MouseEvent mouseevent) {
+				super.mouseDown(mouseevent);
+				if (turn > -1 && turn + 10 < history.size()) {
+					turn = turn + 10;
+					showMapStatus(turn, tomJerryViewer, history, false);
+				}
+			}
 		});
 	}
 
