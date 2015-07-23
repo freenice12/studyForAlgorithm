@@ -54,14 +54,14 @@ public class StringFinderAlgorism {
 		}
 	}
 
-	private static void printMap(String first, String second,
-			int[][] stringArray) {
-		for (int row = 0; row < first.length(); row++) {
-			for (int col = 0; col < second.length(); col++) {
-				System.out.print(stringArray[row][col] + "");
-			}
-			System.out.println();
-		}
-	}
+//	private static void printMap(String first, String second,
+//			int[][] stringArray) {
+//		for (int row = 0; row < first.length(); row++) {
+//			for (int col = 0; col < second.length(); col++) {
+//				System.out.print(stringArray[row][col] + "");
+//			}
+//			System.out.println();
+//		}
+//	}
 
 }

@@ -12,15 +12,15 @@ public class StringFinder {
 		// String secondStr = " 23a2346";
 		// String firstStr = "12345123jdfjdfjdfjdf";
 		// String secondStr = "s902384jdf9123 jdfj";
-		System.out.println(StringFinder.findLongist(firstStr, secondStr));
+		System.out.println(StringFinder.findLongest(firstStr, secondStr));
 		System.out.println(StringFinder
-				.findLongistAlgorism(firstStr, secondStr));
+				.findLongestAlgorism(firstStr, secondStr));
 	}
 
-	public static String findLongist(String firstStr, String secondStr) {
+	public static String findLongest(String firstStr, String secondStr) {
 		StringBuffer buffer = new StringBuffer();
 		Set<String> wordSet = new HashSet<>();
-		findLong(firstStr, 0, secondStr, 0, buffer, wordSet);
+		findMatchedString(firstStr, 0, secondStr, 0, buffer, wordSet);
 		String longest = "";
 		for (String word : wordSet) {
 			// System.out.println(word);
@@ -30,7 +30,7 @@ public class StringFinder {
 		return longest;
 	}
 
-	private static void findLong(String firstStr, int i, String secondStr,
+	private static void findMatchedString(String firstStr, int i, String secondStr,
 			int j, StringBuffer buffer, Set<String> wordSet) {
 		if (firstStr.length() <= i || secondStr.length() <= j)
 			return;
@@ -39,7 +39,7 @@ public class StringFinder {
 			char secondChar = secondStr.charAt(index);
 			if (firstChar == secondChar) {
 				buffer.append(firstChar);
-				findLong(firstStr, i + 1, secondStr, index + 1, buffer, wordSet);
+				findMatchedString(firstStr, i + 1, secondStr, index + 1, buffer, wordSet);
 				continue;
 			}
 			if (buffer.length() > 0) {
@@ -47,7 +47,7 @@ public class StringFinder {
 				return;
 			}
 		}
-		findLong(firstStr, i + 1, secondStr, 0, buffer, wordSet);
+		findMatchedString(firstStr, i + 1, secondStr, 0, buffer, wordSet);
 	}
 
 	private static void addChar(StringBuffer buffer, Set<String> wordSet) {
@@ -55,7 +55,7 @@ public class StringFinder {
 		buffer.delete(0, buffer.length());
 	}
 
-	public static String findLongistAlgorism(String firstStr, String secondStr) {
+	public static String findLongestAlgorism(String firstStr, String secondStr) {
 		String first = firstStr.toLowerCase();
 		String second = secondStr.toLowerCase();
 		int[][] matchedArrays = new int[first.length()][second.length()];
@@ -73,9 +73,8 @@ public class StringFinder {
 							+ 1;
 					if (matchedCounter != initMatchedCharIndex) {
 						matchedCounter = initMatchedCharIndex;
-						matchedString = new StringBuffer();
-						matchedString.append(firstStr.substring(matchedCounter,
-								row + 1));
+						matchedString = updateMatchedString(firstStr,
+								matchedCounter, row);
 					}
 
 				}
@@ -83,7 +82,7 @@ public class StringFinder {
 			}
 		}
 
-		// printMap(first, second, matchedArrays);
+		printMatchedArrays(first, second, matchedArrays);
 
 		return matchedString.toString();
 	}
@@ -91,17 +90,41 @@ public class StringFinder {
 	private static void fillMatchedArrays(String first, String second,
 			int[][] matchedArrays, int row, int col) {
 		if (row < 1 || col < 1) {
-			if (first.charAt(row) == second.charAt(col)) {
+			if (isMatched(first, second, row, col)) {
 				matchedArrays[row][col] = 1;
 			}
 		} else {
-			if (first.charAt(row) == second.charAt(col)) {
+			if (isMatched(first, second, row, col)) {
 				matchedArrays[row][col] = matchedArrays[row - 1][col - 1] + 1;
 			}
 		}
 	}
 
-	private static void printMap(String first, String second,
+	private static boolean isMatched(String first, String second, int row,
+			int col) {
+		return first.charAt(row) == second.charAt(col);
+	}
+	
+	private static StringBuffer updateMatchedString(String firstStr,
+			int matchedCounter, int row) {
+		StringBuffer matchedString;
+		matchedString = new StringBuffer();
+		matchedString.append(firstStr.substring(matchedCounter,
+				row + 1));
+		return matchedString;
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	private static void printMatchedArrays(String first, String second,
 			int[][] stringArray) {
 		for (int row = 0; row < first.length(); row++) {
 			for (int col = 0; col < second.length(); col++) {
