@@ -17,7 +17,7 @@ public class FindTriangles {
 	public static void main(String[] args) {
 		FindTriangles finder = new FindTriangles();
 		List<Line2D> allLines = finder.addAllLines();
-//		Set<Point> allPoints = finder.getAllPoint(allLines);
+		// Set<Point> allPoints = finder.getAllPoint(allLines);
 
 		List<TriangleCo> triangles = finder.findTriangles(allLines);
 		TrianglesViewer viewer = new TrianglesViewer(allLines);
@@ -30,13 +30,13 @@ public class FindTriangles {
 			for (int j = 0; j < allLines.size(); j++) {
 				for (int k = 0; k < allLines.size(); k++) {
 					TriangleCo triangle = new TriangleCo();
-					if (i != j && i != j && i != k) {
-						Point intersectionA = getIntersection(allLines.get(i),
-								allLines.get(j));
-						Point intersectionB = getIntersection(allLines.get(i),
-								allLines.get(k));
-						Point intersectionC = getIntersection(allLines.get(j),
-								allLines.get(k));
+					Line2D lineA = allLines.get(i);
+					Line2D lineB = allLines.get(j);
+					Line2D lineC = allLines.get(k);
+					if (isDifferentLine(i, j, k)) {
+						Point intersectionA = getIntersection(lineA, lineB);
+						Point intersectionB = getIntersection(lineA, lineC);
+						Point intersectionC = getIntersection(lineB, lineC);
 						if (checkPoint(intersectionA, intersectionB,
 								intersectionC)) {
 							triangle.addPoint(intersectionA);
@@ -52,6 +52,10 @@ public class FindTriangles {
 			}
 		}
 		return triangles;
+	}
+
+	private boolean isDifferentLine(int i, int j, int k) {
+		return i != j && i != j && i != k;
 	}
 
 	private boolean checkPoint(Point intersectionA, Point intersectionB,
@@ -70,21 +74,21 @@ public class FindTriangles {
 		return true;
 	}
 
-//	private Set<Point> getAllPoint(List<Line2D> allLines) {
-//		Set<Point> allPoint = new HashSet<Point>();
-//		for (int index = 0; index < allLines.size(); index++) {
-//			for (Line2D line : allLines) {
-//				if (!allLines.get(index).equals(line)) {
-//					Point intersection = getIntersection(allLines.get(index),
-//							line);
-//					if (!intersection.equals(new Point(-1, -1))) {
-//						allPoint.add(intersection);
-//					}
-//				}
-//			}
-//		}
-//		return allPoint;
-//	}
+	// private Set<Point> getAllPoint(List<Line2D> allLines) {
+	// Set<Point> allPoint = new HashSet<Point>();
+	// for (int index = 0; index < allLines.size(); index++) {
+	// for (Line2D line : allLines) {
+	// if (!allLines.get(index).equals(line)) {
+	// Point intersection = getIntersection(allLines.get(index),
+	// line);
+	// if (!intersection.equals(new Point(-1, -1))) {
+	// allPoint.add(intersection);
+	// }
+	// }
+	// }
+	// }
+	// return allPoint;
+	// }
 
 	private Point getIntersection(Line2D lineA, Line2D lineB) {
 		double distance = (lineA.getX1() - lineA.getX2())
