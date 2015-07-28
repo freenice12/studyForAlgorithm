@@ -8,6 +8,9 @@ import org.eclipse.swt.graphics.Point;
 public class Triangle {
 	
 	private Set<Point> pointSet = new HashSet<Point>();
+	private Point firstPoint;
+	private Point secondPoint;
+	private Point thirdPoint;
 
 	public Set<Point> getPointSet() {
 		return pointSet;
@@ -17,6 +20,30 @@ public class Triangle {
 		this.pointSet = pointSet;
 	}
 	
+	public Point getFirstPoint() {
+		return firstPoint;
+	}
+
+	public void setFirstPoint(Point firstPoint) {
+		this.firstPoint = firstPoint;
+	}
+
+	public Point getSecondPoint() {
+		return secondPoint;
+	}
+
+	public void setSecondPoint(Point secondPoint) {
+		this.secondPoint = secondPoint;
+	}
+
+	public Point getThirdPoint() {
+		return thirdPoint;
+	}
+
+	public void setThirdPoint(Point thirdPoint) {
+		this.thirdPoint = thirdPoint;
+	}
+
 	public void addPoint(Point point) {
 		pointSet.add(point);
 	}

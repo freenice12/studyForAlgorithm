@@ -13,22 +13,24 @@ import org.eclipse.swt.graphics.Point;
 public class FindTriangles {
 
 	private List<Set<Point>> bigLines;
-	private Point point1 = new Point(0, 0);
-	private Point point2 = new Point(0, 10);
-	private Point point3 = new Point(10, 10);
-	private Point point4 = new Point(20, 10);
-	private Point point5 = new Point(30, 10);
-	private Point point6 = new Point(23, 13);
-	private Point point7 = new Point(13, 16);
-	private Point point8 = new Point(0, 20);
-	private Point point9 = new Point(15, 20);
-	private Point point10 = new Point(33, 20);
-	private Point point11 = new Point(40, 20);
+	private Point point1 = new Point(5, 5);
+	private Point point2 = new Point(5, 200);
+	private Point point3 = new Point(80,200);
+	private Point point4 = new Point(140, 200);
+	private Point point5 = new Point(220, 200);
+	private Point point6 = new Point(170, 240);
+	private Point point7 = new Point(120, 290);
+	private Point point8 = new Point(5, 400);
+	private Point point9 = new Point(160, 400);
+	private Point point10 = new Point(280, 400);
+	private Point point11 = new Point(440, 400);
 
 	public static void main(String[] args) {
-		FindTriangles triangles = new FindTriangles();
-		Map<Point, List<Point>> allLines = triangles.getLines();
-		triangles.getTrianges(allLines);
+		FindTriangles finder = new FindTriangles();
+		Map<Point, List<Point>> allLines = finder.getLines();
+		Map<Integer, Triangle> triangles = finder.getTrianges(allLines);
+		TrianglesViewer viewer = new TrianglesViewer(triangles);
+		viewer.init();
 	}
 
 	public FindTriangles() {
@@ -81,14 +83,20 @@ public class FindTriangles {
 
 	}
 
-	private void getTrianges(Map<Point, List<Point>> allLines) {
-		Set<Triangle> triangleSet = new HashSet<Triangle>();
+	@SuppressWarnings("boxing")
+	private Map<Integer, Triangle> getTrianges(Map<Point, List<Point>> allLines) {
+		Map<Integer, Triangle> triangleMap = new HashMap<Integer, Triangle>();
+		int count = 0;
+		
 		for (Entry<Point, List<Point>> firstLine : allLines.entrySet()) {
 			Point firstPoint = firstLine.getKey();
 			for (Point secondPoint : firstLine.getValue()) {
 				for (Point thirdPoint : allLines.get(secondPoint)) {
 					if (firstLine.getValue().contains(thirdPoint)) {
 						Triangle triangle = new Triangle();
+						triangle.setFirstPoint(firstPoint);
+						triangle.setSecondPoint(secondPoint);
+						triangle.setThirdPoint(thirdPoint);
 						triangle.addPoint(firstPoint);
 						triangle.addPoint(secondPoint);
 						triangle.addPoint(thirdPoint);
@@ -100,16 +108,16 @@ public class FindTriangles {
 							}
 						}
 						if (isTriangle) {
-							triangleSet.add(triangle);
+							triangleMap.put(count++, triangle);
 						}
 					}
 				}
 			}
 		}
-		for (Triangle triangle : triangleSet) {
-			System.out.println(triangle);
-		}
-		System.out.println(triangleSet.size());
+//		for (Triangle triangle : triangleMap.values()) {
+//			System.out.println(triangle);
+//		}
+		return triangleMap;
 	}
 
 	private Map<Point, List<Point>> getLines() {
@@ -119,64 +127,66 @@ public class FindTriangles {
 		List<Point> endList1 = new ArrayList<Point>();
 		endList1.add(point2);
 
-		Line line1 = new Line(point1);
-		line1.addEndPoint(point2);
-		line1.addEndPoint(point3);
-		line1.addEndPoint(point4);
-		line1.addEndPoint(point5);
-		line1.addEndPoint(point6);
-		line1.addEndPoint(point7);
-		line1.addEndPoint(point8);
-		line1.addEndPoint(point9);
-		line1.addEndPoint(point10);
-		line1.addEndPoint(point11);
-		lineMap.put(point1, line1.getEndPointList());
-		Line line2 = new Line(point2);
-		line2.addEndPoint(point3);
-		line2.addEndPoint(point4);
-		line2.addEndPoint(point5);
-		line2.addEndPoint(point8);
-		lineMap.put(point2, line2.getEndPointList());
-		Line line3 = new Line(point3);
-		line3.addEndPoint(point4);
-		line3.addEndPoint(point5);
-		line3.addEndPoint(point7);
-		line3.addEndPoint(point9);
-		lineMap.put(point3, line3.getEndPointList());
-		Line line4 = new Line(point4);
-		line4.addEndPoint(point5);
-		line4.addEndPoint(point6);
-		line4.addEndPoint(point10);
-		lineMap.put(point4, line4.getEndPointList());
-		Line line5 = new Line(point5);
-		line5.addEndPoint(point6);
-		line5.addEndPoint(point7);
-		line5.addEndPoint(point8);
-		line5.addEndPoint(point11);
-		lineMap.put(point5, line5.getEndPointList());
-		Line line6 = new Line(point6);
-		line6.addEndPoint(point7);
-		line6.addEndPoint(point8);
-		line6.addEndPoint(point10);
-		lineMap.put(point6, line6.getEndPointList());
-		Line line7 = new Line(point7);
-		line7.addEndPoint(point8);
-		line7.addEndPoint(point9);
-		lineMap.put(point7, line7.getEndPointList());
-		Line line8 = new Line(point8);
-		line8.addEndPoint(point9);
-		line8.addEndPoint(point10);
-		line8.addEndPoint(point11);
-		lineMap.put(point8, line8.getEndPointList());
-		Line line9 = new Line(point9);
-		line9.addEndPoint(point10);
-		line9.addEndPoint(point11);
-		lineMap.put(point9, line9.getEndPointList());
-		Line line10 = new Line(point10);
-		line10.addEndPoint(point11);
-		lineMap.put(point10, line10.getEndPointList());
-		Line line11 = new Line(point11);
-		lineMap.put(point11, line11.getEndPointList());
+		List<Point> endPoints = new ArrayList<Point>();
+		endPoints.add(point2);
+		endPoints.add(point3);
+		endPoints.add(point4);
+		endPoints.add(point5);
+		endPoints.add(point6);
+		endPoints.add(point7);
+		endPoints.add(point8);
+		endPoints.add(point9);
+		endPoints.add(point10);
+		endPoints.add(point11);
+		lineMap.put(point1, endPoints);
+//		Line endPoints2 = new Line(point2);
+		List<Point> endPoints2 = new ArrayList<Point>();
+		endPoints2.add(point3);
+		endPoints2.add(point4);
+		endPoints2.add(point5);
+		endPoints2.add(point8);
+		lineMap.put(point2, endPoints2);
+//		Line line3 = new Line(point3);
+		List<Point> endPoints3 = new ArrayList<Point>();
+		endPoints3.add(point4);
+		endPoints3.add(point5);
+		endPoints3.add(point7);
+		endPoints3.add(point9);
+		lineMap.put(point3, endPoints3);
+		List<Point> endPoints4 = new ArrayList<Point>();
+		endPoints4.add(point5);
+		endPoints4.add(point6);
+		endPoints4.add(point10);
+		lineMap.put(point4, endPoints4);
+		List<Point> endPoints5 = new ArrayList<Point>();
+		endPoints5.add(point6);
+		endPoints5.add(point7);
+		endPoints5.add(point8);
+		endPoints5.add(point11);
+		lineMap.put(point5, endPoints5);
+		List<Point> endPoints6 = new ArrayList<Point>();
+		endPoints6.add(point7);
+		endPoints6.add(point8);
+		endPoints6.add(point10);
+		lineMap.put(point6, endPoints6);
+		List<Point> endPoints7 = new ArrayList<Point>();
+		endPoints7.add(point8);
+		endPoints7.add(point9);
+		lineMap.put(point7, endPoints7);
+		List<Point> endPoints8 = new ArrayList<Point>();
+		endPoints8.add(point9);
+		endPoints8.add(point10);
+		endPoints8.add(point11);
+		lineMap.put(point8, endPoints8);
+		List<Point> endPoints9 = new ArrayList<Point>();
+		endPoints9.add(point10);
+		endPoints9.add(point11);
+		lineMap.put(point9, endPoints9);
+		List<Point> endPoints10 = new ArrayList<Point>();
+		endPoints10.add(point11);
+		lineMap.put(point10, endPoints10);
+		List<Point> endPoints11 = new ArrayList<Point>();
+		lineMap.put(point11, endPoints11);
 
 		return lineMap;
 	}
