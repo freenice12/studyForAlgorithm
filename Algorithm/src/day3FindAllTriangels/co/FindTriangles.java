@@ -42,8 +42,7 @@ public class FindTriangles {
 							triangle.addPoint(intersectionA);
 							triangle.addPoint(intersectionB);
 							triangle.addPoint(intersectionC);
-							if (isUnique(triangles, triangle)
-									&& triangle.getPointSet().size() == 3) {
+							if (!triangles.contains(triangle)) {
 								triangles.add(triangle);
 							}
 						}
@@ -64,31 +63,6 @@ public class FindTriangles {
 				&& !intersectionA.equals(new Point(-1, -1))
 				&& !intersectionC.equals(new Point(-1, -1));
 	}
-
-	private boolean isUnique(List<TriangleCo> triangles, TriangleCo triangle) {
-		for (TriangleCo preTriangle : triangles) {
-			if (preTriangle.equals(triangle)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	// private Set<Point> getAllPoint(List<Line2D> allLines) {
-	// Set<Point> allPoint = new HashSet<Point>();
-	// for (int index = 0; index < allLines.size(); index++) {
-	// for (Line2D line : allLines) {
-	// if (!allLines.get(index).equals(line)) {
-	// Point intersection = getIntersection(allLines.get(index),
-	// line);
-	// if (!intersection.equals(new Point(-1, -1))) {
-	// allPoint.add(intersection);
-	// }
-	// }
-	// }
-	// }
-	// return allPoint;
-	// }
 
 	private Point getIntersection(Line2D lineA, Line2D lineB) {
 		double distance = (lineA.getX1() - lineA.getX2())

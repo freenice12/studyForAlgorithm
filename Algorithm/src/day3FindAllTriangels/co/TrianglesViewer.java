@@ -30,32 +30,26 @@ public class TrianglesViewer {
 	private Canvas canvas;
 	GC gc;
 
+	private List<TriangleCo> triangleList;
+	int[] pointArray = new int[6];
+
 	int index;
 	Random random = new Random(255);
 
-	public void animate(List<TriangleCo> triangleList) {
-		gc.setBackground(new Color(Display.getCurrent(), random.nextInt(255),
-				random.nextInt(255), random.nextInt(255)));
+	public void animate() {
 		if (index < triangleList.size()) {
 			TriangleCo selectedTriangle = triangleList.get(index);
-			int[] pointArray = new int[6];
 			int arrayIndex = 0;
 			for (Point point : selectedTriangle.getPointSet()) {
 				pointArray[arrayIndex++] = point.x;
 				pointArray[arrayIndex++] = point.y;
 			}
-			Point center = getCenter(pointArray);
-			Font font = new Font(Display.getCurrent(), new FontData("Serif",
-					12, index));
-			gc.setFont(font);
-			gc.fillPolygon(pointArray);
-			gc.drawString((index + 1) + "", center.x, center.y);
 			canvas.redraw();
 			index++;
 		}
 	}
 
-	private Point getCenter(int[] pointArray) {
+	private Point getCenter() {
 		int x = (pointArray[0] + pointArray[2] + pointArray[4]) / 3;
 		int y = (pointArray[1] + pointArray[3] + pointArray[5]) / 3;
 		return new Point(x, y);
@@ -83,10 +77,23 @@ public class TrianglesViewer {
 
 			@Override
 			public void paintControl(PaintEvent arg0) {
+				gc.setBackground(new Color(Display.getCurrent(), 255, 255, 255));
+				gc.fillRectangle(Display.getCurrent().getClientArea());
+				
+				gc.setBackground(new Color(Display.getCurrent(), random
+						.nextInt(255), random.nextInt(255), random.nextInt(255)));
 
 				for (Line2D lineA : allLines) {
 					gc.drawLine((int) lineA.getX1(), (int) lineA.getY1(),
 							(int) lineA.getX2(), (int) lineA.getY2());
+				}
+				if (index != 0) {
+					Point center = getCenter();
+					Font font = new Font(Display.getCurrent(), new FontData(
+							"Serif", 12, index));
+					gc.setFont(font);
+					gc.fillPolygon(pointArray);
+					gc.drawString((index) + "", center.x, center.y);
 				}
 
 			}
@@ -104,12 +111,13 @@ public class TrianglesViewer {
 		});
 	}
 
-	public void init(final List<TriangleCo> triangleList) {
+	public void init(final List<TriangleCo> triangles) {
+		triangleList = triangles;
 		shell.open();
 		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
-				animate(triangleList);
+				animate();
 				display.timerExec(TIMER_INTERVAL, this);
 			}
 		};
