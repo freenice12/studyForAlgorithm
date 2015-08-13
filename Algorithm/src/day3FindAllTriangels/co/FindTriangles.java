@@ -3,29 +3,116 @@ package day3FindAllTriangels.co;
 import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class FindTriangles {
-	private Line2D line1 = new Line2D.Double(0, 0, 0, 400);
-	private Line2D line2 = new Line2D.Double(0, 0, 160, 400);
-	private Line2D line3 = new Line2D.Double(0, 0, 280, 400);
-	private Line2D line4 = new Line2D.Double(0, 0, 440, 400);
-	private Line2D line5 = new Line2D.Double(0, 200, 220, 200);
-	private Line2D line6 = new Line2D.Double(220, 200, 0, 400);
-	private Line2D line7 = new Line2D.Double(0, 400, 440, 400);
+	public static Line2D LINE1 = new Line2D.Double(0, 0, 0, 400);
+	public static Line2D LINE2 = new Line2D.Double(0, 0, 160, 400);
+	public static Line2D LINE3 = new Line2D.Double(0, 0, 280, 400);
+	public static Line2D LINE4 = new Line2D.Double(0, 0, 440, 400);
+	public static Line2D LINE5 = new Line2D.Double(0, 200, 220, 200);
+	public static Line2D LINE6 = new Line2D.Double(220, 200, 0, 400);
+	public static Line2D LINE7 = new Line2D.Double(0, 400, 440, 400);
 
 	public static void main(String[] args) {
 		FindTriangles finder = new FindTriangles();
-		List<Line2D> allLines = finder.addAllLines();
+		List<Line2D> allLines = FindTriangles.addAllLines();
 		// Set<Point> allPoints = finder.getAllPoint(allLines);
-
 		List<TriangleCo> triangles = finder.findTriangles(allLines);
+		triangles = triangleSort(triangles, new Point(0, 0));
+		Collections.sort(triangles);
 		TrianglesViewer viewer = new TrianglesViewer(allLines);
 		viewer.init(triangles);
 	}
 
+	/*
+	 * H.C
+	 */
+	// private static List<TriangleCo> triangleSort(List<TriangleCo> triangles,
+	// Point firstPoint) {
+	// List<TriangleCo> result = new CopyOnWriteArrayList<>();
+	// for (TriangleCo triangle : triangles) {
+	// if (triangle.contains(firstPoint)) {
+	// result.add(triangle);
+	// }
+	// }
+	// for (TriangleCo triangle : triangles) {
+	// if (triangle.contains(new Point(220, 200)) && !result.contains(triangle)
+	// && !triangle.contains(new Point(440, 400))) {
+	// result.add(triangle);
+	// }
+	// }
+	// for (TriangleCo triangle : triangles) {
+	// if (triangle.contains(new Point(0, 400)) && !result.contains(triangle)) {
+	// result.add(triangle);
+	// }
+	// }
+	// return new ArrayList<>(result);
+	// }
+	private static List<TriangleCo> triangleSort(List<TriangleCo> triangles,
+			Point firstPoint) {
+		List<TriangleCo> triangleList = triangles;
+		List<TriangleCo> result = new CopyOnWriteArrayList<>();
+		boolean isFirst = true;
+		Set<Point> pointSet = new HashSet<>();
+		while (triangleList.size() > 0) {
+			if (isFirst) {
+				for (TriangleCo triangle : triangleList) {
+					if (triangle.contains(firstPoint)
+							&& !result.contains(triangle)) {
+						result.add(triangle);
+						triangleList.remove(triangle);
+					}
+				}
+				isFirst = false;
+			}
+			List<Point> nextPoint = getNextPoints(triangleList, pointSet);
+			int index = 0;
+			for (TriangleCo triangle : triangleList) {
+				if (triangle.contains(nextPoint.get(index))
+						&& !result.contains(triangle)) {
+					result.add(triangle);
+					triangleList.remove(triangle);
+				}
+			}
+		}
+		return new ArrayList<>(result);
+	}
+
+	private static List<Point> getNextPoints(List<TriangleCo> triangleList,
+			Set<Point> pointSet) {
+		List<Point> nextPoint = new ArrayList<>();
+		for (TriangleCo triangle : triangleList) {
+			Iterator<Point> pointIter = triangle.getPointSet().iterator();
+			Point one = pointIter.next();
+			Point two = pointIter.next();
+			Point three = pointIter.next();
+			if (!pointSet.contains(one)) {
+				pointSet.add(one);
+			} else {
+				nextPoint.add(one);
+			}
+			if (!pointSet.contains(two)) {
+				pointSet.add(two);
+			} else {
+				nextPoint.add(two);
+			}
+			if (!pointSet.contains(three)) {
+				pointSet.add(three);
+			} else {
+				nextPoint.add(three);
+			}
+		}
+		return nextPoint;
+	}
+
 	private List<TriangleCo> findTriangles(List<Line2D> allLines) {
-		List<TriangleCo> triangles = new ArrayList<>();
+		List<TriangleCo> triangles = new CopyOnWriteArrayList<>();
 		for (int i = 0; i < allLines.size(); i++) {
 			for (int j = 0; j < allLines.size(); j++) {
 				for (int k = 0; k < allLines.size(); k++) {
@@ -42,7 +129,8 @@ public class FindTriangles {
 							triangle.addPoint(intersectionA);
 							triangle.addPoint(intersectionB);
 							triangle.addPoint(intersectionC);
-							if (!triangles.contains(triangle)) {
+							if (!triangles.contains(triangle)
+									&& triangle.isTriangle()) {
 								triangles.add(triangle);
 							}
 						}
@@ -63,6 +151,22 @@ public class FindTriangles {
 				&& !intersectionA.equals(new Point(-1, -1))
 				&& !intersectionC.equals(new Point(-1, -1));
 	}
+
+	// private Set<Point> getAllPoint(List<Line2D> allLines) {
+	// Set<Point> allPoint = new HashSet<Point>();
+	// for (int index = 0; index < allLines.size(); index++) {
+	// for (Line2D line : allLines) {
+	// if (!allLines.get(index).equals(line)) {
+	// Point intersection = getIntersection(allLines.get(index),
+	// line);
+	// if (!intersection.equals(new Point(-1, -1))) {
+	// allPoint.add(intersection);
+	// }
+	// }
+	// }
+	// }
+	// return allPoint;
+	// }
 
 	private Point getIntersection(Line2D lineA, Line2D lineB) {
 		double distance = (lineA.getX1() - lineA.getX2())
@@ -98,15 +202,15 @@ public class FindTriangles {
 		return intersectionPoint;
 	}
 
-	public List<Line2D> addAllLines() {
+	public static List<Line2D> addAllLines() {
 		List<Line2D> allLines = new ArrayList<Line2D>();
-		allLines.add(line1);
-		allLines.add(line2);
-		allLines.add(line3);
-		allLines.add(line4);
-		allLines.add(line5);
-		allLines.add(line6);
-		allLines.add(line7);
+		allLines.add(LINE1);
+		allLines.add(LINE2);
+		allLines.add(LINE3);
+		allLines.add(LINE4);
+		allLines.add(LINE5);
+		allLines.add(LINE6);
+		allLines.add(LINE7);
 		return allLines;
 	}
 

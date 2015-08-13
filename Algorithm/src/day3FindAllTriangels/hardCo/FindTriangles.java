@@ -146,7 +146,7 @@ public class FindTriangles {
 		endPoints2.add(point5);
 		endPoints2.add(point8);
 		lineMap.put(point2, endPoints2);
-//		Line line3 = new Line(point3);
+//		Line LINE3 = new Line(point3);
 		List<Point> endPoints3 = new ArrayList<Point>();
 		endPoints3.add(point4);
 		endPoints3.add(point5);

@@ -36,7 +36,7 @@ public class TrianglesViewer {
 	int index;
 	Random random = new Random(255);
 
-	public void animate() {
+	public void getNextTriangle() {
 		if (index < triangleList.size()) {
 			TriangleCo selectedTriangle = triangleList.get(index);
 			int arrayIndex = 0;
@@ -117,7 +117,7 @@ public class TrianglesViewer {
 		Runnable runnable = new Runnable() {
 			@Override
 			public void run() {
-				animate();
+				getNextTriangle();
 				display.timerExec(TIMER_INTERVAL, this);
 			}
 		};
