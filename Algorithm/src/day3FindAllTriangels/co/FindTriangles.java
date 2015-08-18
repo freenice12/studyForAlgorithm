@@ -4,7 +4,6 @@ import java.awt.Point;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -48,9 +47,8 @@ public class FindTriangles {
 	private static Point getNextPoint(List<TriangleCo> triangles,
 			List<TriangleCo> result) {
 		for (TriangleCo triangle : triangles) {
-			Iterator<Point> pointIter = triangle.getPointSet().iterator();
 			if (!result.contains(triangle)) {
-				return pointIter.next();
+				return triangle.getAnyPoint();
 			}
 		}
 		return null;

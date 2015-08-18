@@ -49,7 +49,7 @@ public class TrianglesViewer {
 		}
 	}
 
-	private Point getCenter() {
+	Point getCenter() {
 		int x = (pointArray[0] + pointArray[2] + pointArray[4]) / 3;
 		int y = (pointArray[1] + pointArray[3] + pointArray[5]) / 3;
 		return new Point(x, y);
