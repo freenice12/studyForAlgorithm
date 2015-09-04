@@ -18,9 +18,10 @@ Algorithm!
 ## Day 4
 * Matched Square
 * Find number what is half of Total Square Number
-* ex) 1 1 3
-*     1 1 2
-*     2 3 2
+* ex)
+* 1 1 3
+* 1 1 2
+* 2 3 2
 * Total Square Number : 16, half = 8
 * We can choose Square : from (1,1) to (3, 3) ==> 1 + 2 + 3 + 2 = 8
 
@@ -32,8 +33,9 @@ Algorithm!
 * all numbers range 1 to 9
 * fill number from 1 to 9 (40 * 40 - 40) ==> 1580 squares.
 * each square has diff number
-* ex ) 1 2
-*      3 4 ==> 6 (2-1 = 1, 3-1 = 2, 4-2 = 2, 4-3 = 1)
+* ex )
+* 1 2
+* 3 4 ==> 6 (2-1 = 1, 3-1 = 2, 4-2 = 2, 4-3 = 1)
 * find min diff number by filling numbers on board
 
 
