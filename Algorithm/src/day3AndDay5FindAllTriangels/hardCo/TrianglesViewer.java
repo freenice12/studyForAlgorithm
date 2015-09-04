@@ -1,4 +1,4 @@
-package day3FindAllTriangels.hardCo;
+package day3AndDay5FindAllTriangels.hardCo;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

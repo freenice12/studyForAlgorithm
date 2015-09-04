@@ -4,6 +4,8 @@ import java.awt.Point;
 
 import org.junit.Test;
 
+import day3AndDay5FindAllTriangels.co.TriangleCo;
+
 public class TriangleCoTest {
 
 	

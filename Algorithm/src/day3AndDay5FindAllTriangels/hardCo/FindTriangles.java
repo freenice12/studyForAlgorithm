@@ -1,4 +1,4 @@
-package day3FindAllTriangels.hardCo;
+package day3AndDay5FindAllTriangels.hardCo;
 
 import java.util.ArrayList;
 import java.util.HashMap;

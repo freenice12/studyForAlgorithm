@@ -1,4 +1,4 @@
-package day3FindAllTriangels.co;
+package day3AndDay5FindAllTriangels.co;
 
 import java.awt.Point;
 import java.awt.geom.Line2D;
