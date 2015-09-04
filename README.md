@@ -41,5 +41,5 @@ Algorithm!
 
 
 # exDay
-* Fibonacci
+* Fibonacci Sequence
 * [IOError](https://code.google.com/codejam/contest/9214486/dashboard)
