@@ -1,4 +1,4 @@
-package day6TheGreatPlain;
+package day6TheGreatPlain.view;
 
 import java.awt.Point;
 import java.util.Map;
