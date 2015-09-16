@@ -14,10 +14,11 @@ public class GreatePlainServer {
 	public static void main(String[] args) {
 
 		GreatePlainServer server = new GreatePlainServer();
-		server.init();
+		int numOfClient = 1;
+		server.init(numOfClient);
 		
 	}
-	private void init() {
+	private void init(int numOfClient) {
 		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
 		Connection connection;
 		try {
@@ -27,7 +28,7 @@ public class GreatePlainServer {
 
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			MessageConsumer consumer = session.createConsumer(session.createQueue("TestQueue"));
-			consumer.setMessageListener(new ServerMessageHandler(session));
+			consumer.setMessageListener(new ServerMessageHandler(session, numOfClient));
 
 		} catch (JMSException e) {
 			e.printStackTrace();

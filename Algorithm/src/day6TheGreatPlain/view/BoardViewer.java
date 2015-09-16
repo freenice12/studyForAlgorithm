@@ -16,11 +16,10 @@ public class BoardViewer {
 	private Shell shell;
 	private Composite mainComposite;
 	private BoardComposite boardComposite;
-	public BoardViewer() {}
 	public BoardViewer(Map<Point, Integer> board) {
 		display = new Display();
 	    shell = new Shell(display);
-	    shell.setText("Tom & Jerry");
+	    shell.setText("Plain Map");
 	    shell.setSize(500, 500);
 	    shell.setLayout(new GridLayout(2, false));
 	    
@@ -33,6 +32,23 @@ public class BoardViewer {
 	    boardComposite = new BoardComposite(mainComposite);
 	    boardComposite.buildComposite(board);
 	}
+//	public BoardViewer(Map<Point, Integer> board, Map<Point, Integer> givenPoint) {
+//		display = new Display();
+//		shell = new Shell(display);
+//		shell.setText("Plain Map");
+//		shell.setSize(500, 500);
+//		shell.setLayout(new GridLayout(2, false));
+//		
+//		mainComposite = new Composite(shell, SWT.BORDER);
+//		GridLayout gridLayout = new GridLayout();
+//		gridLayout.numColumns = 1;
+//		gridLayout.makeColumnsEqualWidth = false;
+//		mainComposite.setLayout(gridLayout);
+//		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		boardComposite = new BoardComposite(mainComposite);
+//		boardComposite.buildComposite(board, givenPoint);
+//		
+//	}
 	public void init() {
 		shell.open();
 		while (!shell.isDisposed()) {

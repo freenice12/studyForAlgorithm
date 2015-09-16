@@ -18,6 +18,8 @@ import day6TheGreatPlain.common.message.MapRequestMessage;
 
 public class GreatePlainClient {
 	private UUID uuid = UUID.randomUUID();
+	private Session session;
+	private ClientMessageHandler clientHandler;
 
 	public static void main(String[] args) {
 		
@@ -31,7 +33,6 @@ public class GreatePlainClient {
 
 	}
 	
-	private Session session;
 	private void init() {
 		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
 		Connection connection;
@@ -45,18 +46,18 @@ public class GreatePlainClient {
 			consumer.setMessageListener(new ClientTopicHandler(uuid));
 
 		} catch (JMSException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
+		clientHandler = new ClientMessageHandler(this, uuid);
+		
 	}
-	private ClientMessageHandler clientHandler;
+	
 	public void sendRequest(Serializable RequestMessage) throws JMSException {
 		Destination destination = session.createQueue("TestQueue");
 		Destination tempQueue = session.createTemporaryQueue();
 		
 		MessageConsumer consumer = session.createConsumer(tempQueue);
-		clientHandler = new ClientMessageHandler(this, uuid);
 		consumer.setMessageListener(clientHandler);
 		
 		MessageProducer producer = session.createProducer(destination);

@@ -1,6 +1,7 @@
 package day6TheGreatPlain.client;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ import day6TheGreatPlain.view.BoardViewer;
 public class ClientMessageHandler implements MessageListener {
 	private GreatePlainClient greatePlainClient;
 	private UUID uuid;
-	private Map<Point, Integer> givenPoint = new HashMap<Point, Integer>();
+	private Map<Point, Integer> givenPoints = new HashMap<Point, Integer>();
 	public ClientMessageHandler(GreatePlainClient greatePlainClient, UUID uuid) {
 		this.greatePlainClient = greatePlainClient;
 		this.uuid = uuid;
@@ -35,8 +36,9 @@ public class ClientMessageHandler implements MessageListener {
 				System.out.println("from server: MapResponseMessage");
 				Map<Point, Integer> map = ((MapResponseMessage)messageObj).getMap();
 				extractGivenPoint(map);
-				sendPlain(map);
+				sendPlainMap(map);
 				BoardViewer viewer = new BoardViewer(map);
+//				BoardViewer viewer = new BoardViewer(map, givenPoints);
 				viewer.init();
 			} else if (messageObj instanceof SubmitResponseMessage) {
 				System.out.println("from server: SubmitResponseMessage");
@@ -50,19 +52,19 @@ public class ClientMessageHandler implements MessageListener {
 	private void extractGivenPoint(Map<Point, Integer> map) {
 		for (Entry<Point, Integer> entry : map.entrySet()) {
 			if (entry.getValue() != 0) {
-				givenPoint.put(entry.getKey(), entry.getValue());
+				givenPoints.put(entry.getKey(), entry.getValue());
 			}
 		}
 	}
 
-	private void sendPlain(Map<Point, Integer> map) throws JMSException {
+	private void sendPlainMap(Map<Point, Integer> map) throws JMSException {
 		Map<Point, Integer> plainMap = getPlain(map);
 		sendSubmitRequest(plainMap);
 	}
 
 	private Map<Point, Integer> getPlain(Map<Point, Integer> map) {
 		Map<Point, Integer> tempMap = map;
-		for (Entry<Point, Integer> entry : givenPoint.entrySet()) {
+		for (Entry<Point, Integer> entry : givenPoints.entrySet()) {
 			fillNextThePoint(tempMap, entry.getKey(), entry.getValue());
 		}
 		setZeroToOne(tempMap);
@@ -73,29 +75,61 @@ public class ClientMessageHandler implements MessageListener {
 	private void setZeroToOne(Map<Point, Integer> tempMap) {
 		for (Entry<Point, Integer> entry : tempMap.entrySet()) {
 			if (entry.getValue() == 0) {
-				// TODO
-				tempMap.put(entry.getKey(), 5);
+				tempMap.put(entry.getKey(), 1);
 			}
 		}
 	}
 
+	
 	@SuppressWarnings("boxing")
-	private void fillNextThePoint(Map<Point, Integer> tempMap, Point point, Integer targetValue) {
-		int x = point.x;
-		int y = point.y;
+	private void fillNextThePoint(Map<Point, Integer> board, Point currentPoint, Integer currentValue) {
+		if (currentValue < 1)
+			return;
+		int x = currentPoint.x;
+		int y = currentPoint.y;
+		List<Point> checkList = getCheckList(x, y);
+		List<Point> nextPoints = new ArrayList<>();
+		for (Point p : checkList) {
+			if (board.containsKey(p) && !givenPoints.containsKey(p)) {
+				if (board.get(p) == 0 && currentValue > 1) {
+					board.put(p, currentValue-1);
+					nextPoints.add(p);
+				} else if (board.get(p) != 0 && board.get(p) != currentValue - 1) {
+					if (board.get(p) - currentValue > 1) {
+						int meanValue = getMeanValue(board, x, y);						
+						board.put(currentPoint, meanValue);
+					}
+				}
+			} else if (board.containsKey(p) && givenPoints.containsKey(p)) {
+				board.put(currentPoint, ((board.get(p) + currentValue) / 2) % 9);  
+			}
+		}
+		for (Point p : nextPoints) {
+			fillNextThePoint(board, p, currentValue-1);
+		}
+	}
+
+	@SuppressWarnings("boxing")
+	private int getMeanValue(Map<Point, Integer> board, int x, int y) {
+		int mean = 0;
+		int pointCount = 0;
+		List<Point> newsPoints = getCheckList(x, y);
+		for (Point point : newsPoints) {
+			if (board.containsKey(point) && board.get(point) != 0) {
+				pointCount++;
+				mean += board.get(point);
+			}
+		}
+		return ((mean / pointCount) + 1) % 9;
+	}
+
+	private List<Point> getCheckList(int x, int y) {
 		Point E = new Point(x+1, y);
 		Point W = new Point(x-1, y);
 		Point S = new Point(x, y-1);
 		Point N = new Point(x, y+1);
 		List<Point> checkList = Arrays.asList(E, W, S, N);
-		for (Point p : checkList) {
-			if (tempMap.containsKey(p) && tempMap.get(p) == 0 && targetValue > 1) {
-				tempMap.put(p, targetValue-1);
-				fillNextThePoint(tempMap, p, targetValue-1);
-			} else if (tempMap.containsKey(p) && tempMap.get(p) != 0 && !givenPoint.containsKey(p)) {
-				tempMap.put(p, (tempMap.get(p) + targetValue) / 2);
-			}
-		}
+		return checkList;
 	}
 
 	private void sendSubmitRequest(Map<Point, Integer> map) throws JMSException {
