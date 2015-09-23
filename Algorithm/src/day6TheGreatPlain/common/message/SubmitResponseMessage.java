@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public class SubmitResponseMessage implements Serializable {
 
-	private static final long serialVersionUID = 9221813293555867483L;
+	private static final long serialVersionUID = 23L;
 
 }

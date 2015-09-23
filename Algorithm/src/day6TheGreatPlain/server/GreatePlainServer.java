@@ -11,6 +11,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 public class GreatePlainServer {
 
 	private Session session;
+	private ServerMessageHandler serverMessageHandler;
 	public static void main(String[] args) {
 
 		GreatePlainServer server = new GreatePlainServer();
@@ -28,7 +29,8 @@ public class GreatePlainServer {
 
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 			MessageConsumer consumer = session.createConsumer(session.createQueue("TestQueue"));
-			consumer.setMessageListener(new ServerMessageHandler(session, numOfClient));
+			serverMessageHandler = new ServerMessageHandler(session, numOfClient);
+			consumer.setMessageListener(serverMessageHandler);
 
 		} catch (JMSException e) {
 			e.printStackTrace();

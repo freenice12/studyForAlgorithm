@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class SubmitRequestMessage implements Serializable {
 
-	private static final long serialVersionUID = 2073175916757918410L;
+	private static final long serialVersionUID = 22L;
 
 	private UUID uuid;
 	private Map<Point, Integer> map;

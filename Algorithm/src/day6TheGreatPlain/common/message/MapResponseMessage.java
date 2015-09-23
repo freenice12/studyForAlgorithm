@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class MapResponseMessage implements Serializable {
 
-	private static final long serialVersionUID = 9221813293555867483L;
+	private static final long serialVersionUID = 21L;
 	private Map<Point, Integer> map;
 
 	public MapResponseMessage(Map<Point, Integer> map) {

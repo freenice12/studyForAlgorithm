@@ -7,8 +7,6 @@ import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
@@ -34,6 +32,7 @@ public class GreatePlainClient {
 	}
 	
 	private void init() {
+		clientHandler = new ClientMessageHandler(this, uuid);
 		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
 		Connection connection;
 		try {
@@ -41,27 +40,19 @@ public class GreatePlainClient {
 			connection.start();
 
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			Destination topicDestination = session.createTopic("Topic");
-			MessageConsumer consumer = session.createConsumer(topicDestination);
-			consumer.setMessageListener(new ClientTopicHandler(uuid));
+			session.createConsumer(session.createTopic("Topic")).setMessageListener(new ClientTopicHandler(uuid));
 
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
-		
-		clientHandler = new ClientMessageHandler(this, uuid);
-		
 	}
 	
 	public void sendRequest(Serializable RequestMessage) throws JMSException {
-		Destination destination = session.createQueue("TestQueue");
 		Destination tempQueue = session.createTemporaryQueue();
 		
-		MessageConsumer consumer = session.createConsumer(tempQueue);
-		consumer.setMessageListener(clientHandler);
+		session.createConsumer(tempQueue).setMessageListener(clientHandler);
 		
-		MessageProducer producer = session.createProducer(destination);
-		producer.send(createMessage(tempQueue, RequestMessage));
+		session.createProducer(session.createQueue("TestQueue")).send(createMessage(tempQueue, RequestMessage));
 	}
 
 	private ObjectMessage createMessage(Destination tempQueue, Serializable RequestMessage) throws JMSException {

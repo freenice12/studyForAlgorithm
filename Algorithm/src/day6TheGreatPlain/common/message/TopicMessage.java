@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class TopicMessage implements Serializable {
 
-	private static final long serialVersionUID = 4300428810114216706L;
+	private static final long serialVersionUID = 24L;
 
 	private List<UUID> winnerList;
 
