@@ -87,7 +87,11 @@ public class BoardHandler {
 	}
 
 	public void addClient(UUID uuid, Map<Point, Integer> map) {
-		clientManager.addClient(uuid, computeClientMap(map));
+		if (clientManager.isNewClient(uuid)) {
+			clientManager.addClient(uuid, computeClientMap(map));
+		} else {
+			clientManager.setClientMinDiffNum(uuid, computeClientMap(map));
+		}
 	}
 
 	public Map<Point, Integer> getMap() {

@@ -52,5 +52,16 @@ public class ClientManager {
 		}
 		return winner;
 	}
-	
+
+	public boolean isNewClient(UUID uuid) {
+		return !clientResults.containsKey(uuid);
+	}
+
+	@SuppressWarnings("boxing")
+	public void setClientMinDiffNum(UUID uuid, int diffNum) {
+		if (clientResults.get(uuid) > diffNum) {
+			clientResults.put(uuid, diffNum);
+		}
+	}
+
 }
