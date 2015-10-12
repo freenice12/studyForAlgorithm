@@ -1,7 +1,6 @@
 package day6TheGreatPlain;
 
 import java.awt.Point;
-import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;

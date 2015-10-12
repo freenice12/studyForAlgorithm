@@ -45,6 +45,34 @@ public class BoardHandler {
 		return board;
 	}
 	
+//	@SuppressWarnings("boxing")
+//	public int computeClientMap(Map<Point, Integer> clientMap) {
+//		int result = 0;
+//		for (int x=0; x<mapSize ; x++) {
+//			for (int y=0; y<mapSize; y++) {
+//				int target = clientMap.get(new Point(x, y));
+//				result += getDiffFrom(target, x, y);
+//			}
+//		}
+//		System.out.println("The result is : " + result);
+//		return result;
+//	}
+//
+//	@SuppressWarnings("boxing")
+//	private int getDiffFrom(int target, int x, int y) {
+//		int divCounter = 0;
+//		int diff = 0;
+//		List<Point> checkList = getCheckList(x, y);
+//		for (Point point : checkList) {
+//			if (board.containsKey(point)) {
+//				divCounter++;
+//				diff += Math.pow(Math.abs(board.get(point) - target), 2);
+//			}
+//				
+//		}
+//		return diff / divCounter;
+//	}
+	
 	@SuppressWarnings("boxing")
 	public int computeClientMap(Map<Point, Integer> clientMap) {
 		int result = 0;
@@ -60,17 +88,14 @@ public class BoardHandler {
 
 	@SuppressWarnings("boxing")
 	private int getDiffFrom(int target, int x, int y) {
-		int divCounter = 0;
 		int diff = 0;
 		List<Point> checkList = getCheckList(x, y);
 		for (Point point : checkList) {
 			if (board.containsKey(point)) {
-				divCounter++;
-				diff += Math.pow(Math.abs(board.get(point) - target), 2);
+				diff += Math.pow(board.get(point) - target, 2);
 			}
-				
 		}
-		return diff / divCounter;
+		return diff;
 	}
 
 	private List<Point> getCheckList(int x, int y) {

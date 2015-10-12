@@ -28,7 +28,7 @@ public class GreatePlainServer {
 			connection.start();
 
 			session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-			MessageConsumer consumer = session.createConsumer(session.createQueue("TestQueue"));
+			MessageConsumer consumer = session.createConsumer(session.createQueue("ServerQueue"));
 			serverMessageHandler = new ServerMessageHandler(session, numOfClient);
 			consumer.setMessageListener(serverMessageHandler);
 

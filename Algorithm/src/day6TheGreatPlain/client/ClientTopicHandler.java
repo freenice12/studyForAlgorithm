@@ -7,7 +7,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
-import day6TheGreatPlain.common.message.TopicMessage;
+import common.message1.TopicMessage;
 
 public class ClientTopicHandler implements MessageListener {
 
@@ -22,17 +22,21 @@ public class ClientTopicHandler implements MessageListener {
 		try {
 			messageObj = ((ObjectMessage) message).getObject();
 			if (messageObj instanceof TopicMessage) {
-				for (UUID winner : ((TopicMessage)messageObj).getWinnerList()) {
-					if (uuid.equals(winner)) {
-						System.out.println("WIN!");
-						return;
-					}
-				}
-				System.out.println("another WIN!");
+				printStatus(messageObj);
 			}
 		} catch (JMSException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void printStatus(Object messageObj) {
+		for (UUID winner : ((TopicMessage)messageObj).getWinnerList()) {
+			if (uuid.equals(winner)) {
+				System.out.println("WIN!");
+				return;
+			}
+		}
+		System.out.println("another WIN!");
 	}
 
 }

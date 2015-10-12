@@ -19,7 +19,12 @@ public class ClientManager {
 
 	@SuppressWarnings("boxing")
 	public void addClient(UUID clientUUID, int diffNum) {
-		clientResults.put(clientUUID, diffNum);
+		if (isNewClient(clientUUID)) {
+//			addClient(clientUUID, diffNum);
+			clientResults.put(clientUUID, diffNum);
+		} else {
+			setClientMinDiffNum(clientUUID, diffNum);
+		}
 	}
 	
 	public List<UUID> getWinner() {

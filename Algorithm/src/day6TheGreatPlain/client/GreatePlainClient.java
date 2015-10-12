@@ -12,7 +12,7 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
-import day6TheGreatPlain.common.message.MapRequestMessage;
+import common.message1.MapRequestMessage;
 
 public class GreatePlainClient {
 	private UUID uuid = UUID.randomUUID();
@@ -20,7 +20,6 @@ public class GreatePlainClient {
 	private ClientMessageHandler clientHandler;
 
 	public static void main(String[] args) {
-		
 		GreatePlainClient client = new GreatePlainClient();
 		client.init();
 		try {
@@ -33,7 +32,8 @@ public class GreatePlainClient {
 	
 	private void init() {
 		clientHandler = new ClientMessageHandler(this, uuid);
-		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
+		ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://146.11.76.84:61616");
+//		ConnectorFactory1 connectionFactory = new ActiveMQConnectionFactory();
 		Connection connection;
 		try {
 			connection = connectionFactory.createConnection();
@@ -52,7 +52,8 @@ public class GreatePlainClient {
 		
 		session.createConsumer(tempQueue).setMessageListener(clientHandler);
 		
-		session.createProducer(session.createQueue("TestQueue")).send(createMessage(tempQueue, RequestMessage));
+		session.createProducer(session.createQueue("ServerQueue")).send(createMessage(tempQueue, RequestMessage));
+		System.out.println("send request message");
 	}
 
 	private ObjectMessage createMessage(Destination tempQueue, Serializable RequestMessage) throws JMSException {

@@ -10,11 +10,11 @@ import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 import javax.jms.Session;
 
-import day6TheGreatPlain.common.message.MapRequestMessage;
-import day6TheGreatPlain.common.message.MapResponseMessage;
-import day6TheGreatPlain.common.message.SubmitRequestMessage;
-import day6TheGreatPlain.common.message.SubmitResponseMessage;
-import day6TheGreatPlain.common.message.TopicMessage;
+import common.message1.MapRequestMessage;
+import common.message1.MapResponseMessage;
+import common.message1.SubmitRequestMessage;
+import common.message1.SubmitResponseMessage;
+import common.message1.TopicMessage;
 
 public class ServerMessageHandler implements MessageListener {
 	
@@ -24,11 +24,13 @@ public class ServerMessageHandler implements MessageListener {
 	private int submitCount;
 	
 	private BoardHandler boardHandler;
+	private ClientManager clientManager;
 
 	public ServerMessageHandler(Session session, int numOfClient) {
 		this.session = session;
 		this.numOfClient = numOfClient;
 		this.boardHandler = new BoardHandler();
+		this.clientManager = new ClientManager();
 	}
 	
 	
@@ -71,12 +73,15 @@ public class ServerMessageHandler implements MessageListener {
 	
 
 	private void addClient(Object messageObj) {
-		boardHandler.addClient(((SubmitRequestMessage)messageObj).getUuid(), ((SubmitRequestMessage)messageObj).getMap());
+		SubmitRequestMessage submit = ((SubmitRequestMessage)messageObj);
+		clientManager.addClient(submit.getUuid(), boardHandler.computeClientMap(submit.getMap()));
+//		boardHandler.addClient(submit.getUuid(), ((SubmitRequestMessage)messageObj).getMap());
 	}
 
 
 	private void sendTopicWinner() throws JMSException {
-		sendTopic(boardHandler.getWinner());
+//		sendTopic(boardHandler.getWinner());
+		sendTopic(clientManager.getWinner());
 	}
 
 	private void sendTopic(List<UUID> clients)

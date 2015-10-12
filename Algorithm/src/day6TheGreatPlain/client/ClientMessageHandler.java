@@ -7,9 +7,9 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
-import day6TheGreatPlain.common.message.MapResponseMessage;
-import day6TheGreatPlain.common.message.SubmitRequestMessage;
-import day6TheGreatPlain.common.message.SubmitResponseMessage;
+import common.message1.MapResponseMessage;
+import common.message1.SubmitRequestMessage;
+import common.message1.SubmitResponseMessage;
 import day6TheGreatPlain.view.BoardViewer;
 
 public class ClientMessageHandler implements MessageListener {
@@ -23,15 +23,17 @@ public class ClientMessageHandler implements MessageListener {
 
 	@Override
 	public void onMessage(Message message) {
+		System.out.println("response");
 		try {
 			Object messageObj = ((ObjectMessage) message).getObject();
 			if (messageObj instanceof MapResponseMessage) {
 				System.out.println("from server: MapResponseMessage");
 				clientManager.setMap(((MapResponseMessage)messageObj).getMap());
 				sendSubmitRequest();
-				showMap();
+//				showMap();
 			} else if (messageObj instanceof SubmitResponseMessage) {
 				System.out.println("from server: SubmitResponseMessage");
+				showMap();
 			}
 		} catch (JMSException e) {
 			e.printStackTrace();

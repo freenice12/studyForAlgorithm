@@ -23,7 +23,33 @@ public class ClientManager {
 		this.map = map;
 		extractGivenPoint();
 		makePlain();
+//		System.out.println(computeClientMap(map));
 	}
+	
+//	@SuppressWarnings("boxing")
+//	public int computeClientMap(Map<Point, Integer> clientMap) {
+//		int result = 0;
+//		for (int x=0; x<40 ; x++) {
+//			for (int y=0; y<40; y++) {
+//				int target = clientMap.get(new Point(x, y));
+//				result += getDiffFrom(target, x, y);
+//			}
+//		}
+//		System.out.println("The result is : " + result);
+//		return result;
+//	}
+//
+//	@SuppressWarnings("boxing")
+//	private int getDiffFrom(int target, int x, int y) {
+//		int diff = 0;
+//		List<Point> checkList = getCheckList(x, y);
+//		for (Point point : checkList) {
+//			if (map.containsKey(point)) {
+//				diff += Math.pow(Math.abs(map.get(point) - target), 2);
+//			}
+//		}
+//		return diff;
+//	}
 
 	@SuppressWarnings("boxing")
 	private void extractGivenPoint() {
