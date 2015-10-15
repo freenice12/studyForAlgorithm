@@ -77,30 +77,4 @@ public class BoardLine implements Serializable {
 		return sb.toString();
 	}
 
-	// public static void main(String[] args) {
-	// BoardLine b = new BoardLine(5);
-	// BoardLine b1 = new BoardLine(4);
-	// BoardLine b2 = new BoardLine(1);
-	// List<BoardLine> bs = new ArrayList<>();
-	// bs.add(b);
-	// bs.add(b1);
-	// bs.add(b2);
-	//
-	// System.out.println(b.switchState(2));
-	// System.out.println(b.getLineSize());
-	// printKK(bs);
-	// System.out.println(b.switchState(2));
-	// System.out.println(b.getLineSize());
-	// printKK(bs);
-	// System.out.println(b.switchState(1));
-	// System.out.println(b.getLineSize());
-	// printKK(bs);
-	// }
-	//
-	// private static void printKK(List<BoardLine> bs) {
-	// for (BoardLine bl : bs) {
-	// System.out.println(bl);
-	// }
-	// }
-
 }

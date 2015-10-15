@@ -1,4 +1,4 @@
-package day7DeleteGame.client;
+package day7DeleteGame.client.ui;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +51,6 @@ public class ButtonComposite extends Composite {
 
 	}
 
-
 	private void createClientsLabel() {
 		for (int i = 0; i < 4; i++) {
 			Label clientLabel = new Label(composite, SWT.NONE);
@@ -61,6 +60,7 @@ public class ButtonComposite extends Composite {
 			clientsLabel.add(clientLabel);
 		}
 	}
+
 	private void createPassButton(GridData gd) {
 		passButton = new Button(composite, SWT.PUSH);
 		passButton.setText("Pass");
@@ -125,7 +125,7 @@ public class ButtonComposite extends Composite {
 					clientLabel.setText(client);
 					if (id.equals(client)) {
 						clientLabel.setForeground(getDisplay().getSystemColor(
-								SWT.COLOR_BLUE));
+								SWT.COLOR_RED));
 					} else {
 						clientLabel.setForeground(getDisplay().getSystemColor(
 								SWT.COLOR_BLACK));
@@ -179,6 +179,10 @@ public class ButtonComposite extends Composite {
 				passButton.setEnabled(b);
 			}
 		});
+	}
+
+	public void sendPass() {
+		clientViewHandler.sendPass();
 	}
 
 }

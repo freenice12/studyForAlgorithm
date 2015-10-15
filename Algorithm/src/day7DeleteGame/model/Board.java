@@ -9,9 +9,10 @@ public class Board implements Serializable {
 	private static final long serialVersionUID = 2L;
 	private static Board instance;
 	private static Random random = new Random();
-	private static int limit = 9;
+	private static int limit = 5;
 	private List<BoardLine> lines = new ArrayList<>();
 	private int maxColNum;
+	private boolean isFinish;
 	
 	private Board(int count) {
 		for (int i = 0; i < count; i++) {
@@ -41,7 +42,7 @@ public class Board implements Serializable {
 	
 	public static Board getInstance() {
 		if (instance == null)
-			instance = new Board(random.nextInt(limit)+1);
+			instance = new Board(random.nextInt(limit)+5);
 		return instance;
 	}
 	
@@ -134,11 +135,12 @@ public class Board implements Serializable {
 	}
 
 	public boolean isFinish() {
+		isFinish = true;
 		for (Integer trueNum : getTrueSizeArray()) {
 			if (trueNum.intValue() != 0)
-				return false;
+				isFinish = false;
 		}
-		return true;
+		return isFinish;
 	}
 
 	public boolean isEven() {
@@ -159,16 +161,5 @@ public class Board implements Serializable {
 		}
 		return only == 1 && other == 0;
 	}
-
-//	public static void main(String[] args) {
-//		Board b = Board.getInstance();
-//		System.out.println(b);
-//		Board b1 = Board.getInstance();
-//		System.out.println(b1);
-//		b.deleteAt(1, 2);
-//		System.out.println(b);
-//		b.deleteAt(2, 2);
-//		System.out.println(b);
-//	}
 	
 }

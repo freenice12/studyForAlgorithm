@@ -1,4 +1,4 @@
-package day7DeleteGame.client;
+package day7DeleteGame.client.ui;
 
 import java.util.Collection;
 import java.util.Set;
@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import day7DeleteGame.client.GameClientTopicHandler;
 import day7DeleteGame.model.Board;
 
 public class ClientViewHandler {
@@ -22,6 +23,7 @@ public class ClientViewHandler {
 	private GameComposite gameComposite;
 	private ButtonComposite buttonComposite;
 	private GameClientTopicHandler clientHandler;
+	private String userId;
 	
 	public ClientViewHandler(GameClientTopicHandler clientHandler) {
 		this.clientHandler = clientHandler;
@@ -100,6 +102,22 @@ public class ClientViewHandler {
 
 	public void enablePassButton(boolean b) {
 		buttonComposite.setEnablePassButton(b);
+	}
+
+	public void sendPass() {
+		clientHandler.sendPass();
+	}
+
+	public void updateInfo(int turnCount, String next) {
+		gameComposite.updateTurn(turnCount, next);
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	
+	public String getUserId() {
+		return userId;
 	}
 
 

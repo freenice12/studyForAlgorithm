@@ -20,8 +20,9 @@ public class GameManager {
 	}
 
 	public boolean putPassClient(UUID client) {
-		if (passedClients.containsKey(client))
+		if (passedClients.containsKey(client)) {
 			return false;
+		}
 		passedClients.put(client, Boolean.TRUE);
 		return true;
 	}
@@ -36,10 +37,6 @@ public class GameManager {
 
 	public Object getUUID(int turn) {
 		return history.get(Integer.valueOf(turn)).getUuid();
-	}
-
-	public boolean passedClient(UUID client) {
-		return passedClients.containsKey(client);
 	}
 
 }

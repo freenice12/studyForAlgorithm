@@ -1,4 +1,4 @@
-package day7DeleteGame.client;
+package day7DeleteGame.client.ui;
 
 import java.util.Set;
 
@@ -15,9 +15,9 @@ public class SendListener extends MouseAdapter {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		System.out.println(getClass().getName()+" clicked");
 		Set<Point> selectedPoints = buttonComposite.getSelectedPoints();
 		buttonComposite.sendPoints(selectedPoints, false);
 		buttonComposite.pointRepoInit();
-		System.out.println(getClass().getName()+" clicked");
 	}
 }

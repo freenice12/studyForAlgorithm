@@ -1,4 +1,4 @@
-package day7DeleteGame.client;
+package day7DeleteGame.client.ui;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,8 +27,10 @@ import day7DeleteGame.model.BoardLine;
 public class GameComposite extends Composite implements PaintListener,
 		MouseListener {
 
-	static final Color DARK_GRAY = Display.getDefault().getSystemColor(
-			SWT.COLOR_DARK_GRAY);
+	private static final int WIDTH = 455;
+	private static final int HIGHT = 400;
+	static final Color GRAY = Display.getDefault().getSystemColor(
+			SWT.COLOR_GRAY);
 	static final Color RED = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 	static final Color BLUE = Display.getDefault().getSystemColor(
 			SWT.COLOR_BLUE);
@@ -36,24 +38,28 @@ public class GameComposite extends Composite implements PaintListener,
 			SWT.COLOR_WHITE);
 	protected Canvas canvas;
 	protected GC gc;
+	protected Font font = new Font(Display.getDefault(), "Tahoma", 18, SWT.BOLD);
 	private Board board;
 	private List<Region> regions = new ArrayList<Region>();
 	private Map<Point, Boolean> enablePoints = new HashMap<>();
 	private Map<Point, Boolean> selectedPoints = new HashMap<>();
-	private ClientViewHandler clientViewHandler;
+	protected ClientViewHandler clientViewHandler;
+	private int maxXsize;
+	private int maxYsize;
 
 	public GameComposite(Composite parent, ClientViewHandler clientViewHandler) {
 		super(parent, SWT.NONE);
 		this.clientViewHandler = clientViewHandler;
 		canvas = new Canvas(this, SWT.NO_BACKGROUND);
 		gc = new GC(canvas);
-		canvas.setSize(455, 400);
+		canvas.setSize(WIDTH, HIGHT);
 		canvas.addPaintListener(this);
-		// canvas.addMouseListener(this);
 	}
 
 	public void updateView(Board gameBoard) {
 		board = gameBoard;
+		maxXsize = board.getSize();
+		maxYsize = board.getMaxColSize();
 		enablePoints.clear();
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -65,28 +71,47 @@ public class GameComposite extends Composite implements PaintListener,
 
 	@Override
 	public void paintControl(PaintEvent paintevent) {
+		prepareCanvas();
 		if (board == null)
 			return;
 		for (int col = 0; col < board.getSize(); col++) {
 			for (int row = 0; row < board.getElementSize(col); row++) {
 				BoardLine line = board.getElementAt(col);
 				Boolean element = line.getElement(row);
-				Color color;
-				if (element.equals(Boolean.TRUE)) {
-					Point enable = new Point(col, row);
-					enablePoints.put(enable, Boolean.TRUE);
-					color = DARK_GRAY;
-				} else {
-					color = RED;
-				}
-				paintevent.gc.setBackground(color);
-				Rectangle rec = new Rectangle(col * 45, row * 40, 35, 30);
+				Rectangle rec = new Rectangle(getX(col), getY(row),
+						getWidth() - 10, getHight() - 10);
 				Region region = new Region();
 				region.add(rec);
 				regions.add(region);
-				paintevent.gc.fillRectangle(rec);
+				if (element.equals(Boolean.TRUE)) {
+					Point enable = new Point(col, row);
+					enablePoints.put(enable, Boolean.TRUE);
+					paintevent.gc.setForeground(GRAY);
+					paintevent.gc.setBackground(RED);
+				} else {
+					paintevent.gc.setForeground(WHITE);
+					paintevent.gc.setBackground(GRAY);
+				}
+				paintevent.gc.fillGradientRectangle(rec.x, rec.y, rec.width,
+						rec.height, element.booleanValue());
 			}
 		}
+	}
+
+	private int getX(int col) {
+		return (col * getWidth()) < 0 ? 0 : (col * getWidth());
+	}
+
+	private int getWidth() {
+		return (WIDTH / maxXsize);
+	}
+
+	private int getY(int row) {
+		return (row * getHight()) < 0 ? 0 : (row * getHight());
+	}
+
+	private int getHight() {
+		return (HIGHT / maxYsize);
 	}
 
 	@Override
@@ -94,8 +119,8 @@ public class GameComposite extends Composite implements PaintListener,
 		boolean find = false;
 		for (Region region : regions) {
 			if (region.getBounds().contains(e.x, e.y)) {
-				int col = region.getBounds().x / 40;
-				int row = region.getBounds().y / 40;
+				int col = region.getBounds().x / getWidth();
+				int row = region.getBounds().y / getHight();
 				Point checkPoint = new Point(col, row);
 				if (enablePoints.containsKey(checkPoint)) {
 					clientViewHandler.enableSendButton(true);
@@ -105,10 +130,10 @@ public class GameComposite extends Composite implements PaintListener,
 							if (!isTheSameCol(checkPoint, point))
 								return;
 						}
-						changeSelectedRegion(region, BLUE);
+						changeSelectedRegion(region, true);
 						selectedPoints.put(checkPoint, Boolean.FALSE);
 					} else {
-						changeSelectedRegion(region, DARK_GRAY);
+						changeSelectedRegion(region, false);
 						selectedPoints.remove(checkPoint);
 						if (selectedPoints.isEmpty()) {
 							clientViewHandler.enableSendButton(false);
@@ -119,13 +144,24 @@ public class GameComposite extends Composite implements PaintListener,
 					return;
 			}
 		}
-		System.out.println(selectedPoints);
+		// System.out.println(selectedPoints);
 	}
 
-	private void changeSelectedRegion(Region region, Color color) {
-		gc.setForeground(color);
-		gc.setBackground(color);
-		gc.fillRectangle(region.getBounds());
+	private void changeSelectedRegion(Region region, boolean selected) {
+		if (selected) {
+			gc.setForeground(RED);
+			gc.setBackground(GRAY);
+			int in = 5;
+			gc.fillGradientRectangle(region.getBounds().x + in,
+					region.getBounds().y + in, region.getBounds().width - in*2,
+					region.getBounds().height - in*2, true);
+		} else {
+			gc.setForeground(GRAY);
+			gc.setBackground(RED);
+			gc.fillGradientRectangle(region.getBounds().x,
+					region.getBounds().y, region.getBounds().width,
+					region.getBounds().height, true);
+		}
 	}
 
 	private boolean isTheSameCol(Point checkPoint, Point point) {
@@ -152,15 +188,12 @@ public class GameComposite extends Composite implements PaintListener,
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				if (b)
-					addListener(b);
-				else
-					addListener(b);
+				setListener(b);
 			}
 		});
 	}
 
-	void addListener(boolean b) {
+	void setListener(boolean b) {
 		if (b)
 			canvas.addMouseListener(this);
 		else
@@ -171,8 +204,6 @@ public class GameComposite extends Composite implements PaintListener,
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				Font font = new Font(Display.getDefault(), "Tahoma", 18,
-						SWT.BOLD);
 				gc.setFont(font);
 				gc.setForeground(WHITE);
 				gc.setBackground(BLUE);
@@ -183,10 +214,45 @@ public class GameComposite extends Composite implements PaintListener,
 					text.append("Well Done!");
 
 				Point textSize = gc.textExtent(text.toString());
-				gc.drawText(text.toString(), (canvas.getSize().x - textSize.x) / 2,
+				gc.drawText(text.toString(),
+						(canvas.getSize().x - textSize.x) / 2,
 						(canvas.getSize().y - textSize.y) / 2);
 			}
 		});
 	}
 
+	public void updateTurn(final int turnCount, final String next) {
+		Display.getDefault().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Display.getDefault().timerExec(1000, new Runnable() {
+
+					@Override
+					public void run() {
+						canvas.redraw();
+					}
+				});
+				prepareCanvas();
+				gc.setFont(font);
+				gc.setForeground(BLUE);
+				StringBuffer text = new StringBuffer("Round: " + turnCount
+						+ "\n");
+				if (next.equals(clientViewHandler.getUserId()))
+					text.append("\nMy Turn");
+				else
+					text.append("\n" + next);
+				final Point textSize = gc.textExtent(text.toString());
+				gc.drawText(text.toString(),
+						(canvas.getSize().x - textSize.x) / 2,
+						(canvas.getSize().y - textSize.y) / 2);
+			}
+
+		});
+	}
+
+	protected void prepareCanvas() {
+		gc.setBackground(WHITE);
+		gc.fillRectangle(canvas.getClientArea());
+	}
 }

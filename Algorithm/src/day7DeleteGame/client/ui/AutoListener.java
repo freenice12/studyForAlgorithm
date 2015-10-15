@@ -1,4 +1,4 @@
-package day7DeleteGame.client;
+package day7DeleteGame.client.ui;
 
 import java.util.Collections;
 
@@ -14,8 +14,8 @@ public class AutoListener extends MouseAdapter {
 
 	@Override
 	public void mouseDown(MouseEvent e) {
+		System.out.println(getClass().getName()+" clicked");
 		buttonComposite.sendPoints(Collections.EMPTY_SET, true);
 		buttonComposite.pointRepoInit();
-		System.out.println(getClass().getName()+" clicked");
 	}
 }
