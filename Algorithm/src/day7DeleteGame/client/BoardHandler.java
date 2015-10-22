@@ -56,7 +56,7 @@ public class BoardHandler implements GameMapHandler {
 			else
 				result += ele.intValue();
 		}
-		System.out.println("result: " + result + " / canPass: " + canPass);
+//		System.out.println("result: " + result + " / canPass: " + canPass);
 		if (result == 0 && canPass)
 			return true;
 		else if (result == 0 && !canPass)
@@ -64,7 +64,7 @@ public class BoardHandler implements GameMapHandler {
 		else if (result > elementSize)
 			board.switchAt(targetCol, elementSize);
 		else
-			board.switchAt(targetCol, Math.abs(result));
+			board.switchAt(targetCol, elementSize % 2 == 0 ? 1 : 2);
 
 		return false;
 

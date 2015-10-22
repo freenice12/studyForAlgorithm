@@ -85,9 +85,19 @@ public class ServerHandler implements MessageListener {
 		sendTurnTopic(board.getBoard(), isFinish);
 		gameManager.saveHistory(turn, ((SubmitRequestMessage) messageObj));
 		if (isFinish) {
+			init();
 			conn.sendTopic(new EndTopicMessage(
 					((SubmitRequestMessage) messageObj).getUuid()));
 		}
+	}
+
+	private void init() {
+		Board.initInstance().getBoard();
+		count = 0;
+		turn = 0;
+		readyCount = 0;
+		clientMap = new LinkedHashMap<>();
+		gameManager = new GameManager();
 	}
 
 	private void start(Destination jmsReplyTo) {

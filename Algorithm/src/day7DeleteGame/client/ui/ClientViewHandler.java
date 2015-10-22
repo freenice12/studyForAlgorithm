@@ -24,6 +24,7 @@ public class ClientViewHandler {
 	private ButtonComposite buttonComposite;
 	private GameClientTopicHandler clientHandler;
 	private String userId;
+	private boolean reGame;
 	
 	public ClientViewHandler(GameClientTopicHandler clientHandler) {
 		this.clientHandler = clientHandler;
@@ -51,7 +52,7 @@ public class ClientViewHandler {
 	}
 
 	public void init() {
-		shell.setSize(500, 600);
+		shell.setSize(500, 570);
 		shell.open();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
@@ -61,6 +62,8 @@ public class ClientViewHandler {
 	}
 	
 	public void sendReady() {
+		if (reGame)
+			clientHandler.sendInit();
 		clientHandler.sendReady();
 	}
 	
@@ -94,6 +97,8 @@ public class ClientViewHandler {
 
 	public void showResult(UUID clientUUID, UUID otherClientUUID) {
 		gameComposite.showResult(clientUUID.equals(otherClientUUID));
+		buttonComposite.setEnableReadyButton(true);
+		reGame = true;
 	}
 
 	public void enableAutoButton(boolean b) {
@@ -110,6 +115,7 @@ public class ClientViewHandler {
 
 	public void updateInfo(int turnCount, String next) {
 		gameComposite.updateTurn(turnCount, next);
+		buttonComposite.updateStatus(userId, next, turnCount);
 	}
 
 	public void setUserId(String userId) {

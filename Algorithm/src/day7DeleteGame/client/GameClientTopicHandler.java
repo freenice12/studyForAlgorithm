@@ -13,12 +13,12 @@ import javax.jms.ObjectMessage;
 
 import org.eclipse.swt.graphics.Point;
 
+import common.message.InitRequestMessage;
 import common.message.ReadyRequestMessage;
 import common.message.SubmitRequestMessage;
 import common.message.topic.EndTopicMessage;
 import common.message.topic.StartTopicMessage;
 import common.message.topic.TurnTopicMessage;
-
 import day7DeleteGame.client.ui.ClientViewHandler;
 import day7DeleteGame.util.ActivemqConnector;
 
@@ -129,6 +129,10 @@ public class GameClientTopicHandler implements MessageListener{
 			object.setPass();
 			connector.sendTempMessage(object);
 		}
+	}
+
+	public void sendInit() {
+		connector.sendTempMessage(new InitRequestMessage(viewHandler.uuid));
 	}
 
 }

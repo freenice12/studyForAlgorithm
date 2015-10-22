@@ -86,14 +86,15 @@ public class GameComposite extends Composite implements PaintListener,
 				if (element.equals(Boolean.TRUE)) {
 					Point enable = new Point(col, row);
 					enablePoints.put(enable, Boolean.TRUE);
-					paintevent.gc.setForeground(GRAY);
+//					paintevent.gc.setForeground(GRAY);
 					paintevent.gc.setBackground(RED);
 				} else {
-					paintevent.gc.setForeground(WHITE);
+//					paintevent.gc.setForeground(WHITE);
 					paintevent.gc.setBackground(GRAY);
 				}
-				paintevent.gc.fillGradientRectangle(rec.x, rec.y, rec.width,
-						rec.height, element.booleanValue());
+				paintevent.gc.fillRectangle(rec);
+//				paintevent.gc.fillGradientRectangle(rec.x, rec.y, rec.width,
+//						rec.height, element.booleanValue());
 			}
 		}
 	}
@@ -149,19 +150,21 @@ public class GameComposite extends Composite implements PaintListener,
 
 	private void changeSelectedRegion(Region region, boolean selected) {
 		if (selected) {
-			gc.setForeground(RED);
-			gc.setBackground(GRAY);
-			int in = 5;
-			gc.fillGradientRectangle(region.getBounds().x + in,
-					region.getBounds().y + in, region.getBounds().width - in*2,
-					region.getBounds().height - in*2, true);
+//			gc.setForeground(RED);
+			gc.setBackground(BLUE);
+			
+//			int in = 5;
+//			gc.fillGradientRectangle(region.getBounds().x + in,
+//					region.getBounds().y + in, region.getBounds().width - in*2,
+//					region.getBounds().height - in*2, true);
 		} else {
-			gc.setForeground(GRAY);
+//			gc.setForeground(GRAY);
 			gc.setBackground(RED);
-			gc.fillGradientRectangle(region.getBounds().x,
-					region.getBounds().y, region.getBounds().width,
-					region.getBounds().height, true);
+//			gc.fillGradientRectangle(region.getBounds().x,
+//					region.getBounds().y, region.getBounds().width,
+//					region.getBounds().height, true);
 		}
+		gc.fillRectangle(region.getBounds());
 	}
 
 	private boolean isTheSameCol(Point checkPoint, Point point) {
@@ -233,7 +236,7 @@ public class GameComposite extends Composite implements PaintListener,
 						canvas.redraw();
 					}
 				});
-				prepareCanvas();
+//				prepareCanvas();
 				gc.setFont(font);
 				gc.setForeground(BLUE);
 				StringBuffer text = new StringBuffer("Round: " + turnCount

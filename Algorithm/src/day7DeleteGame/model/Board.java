@@ -46,6 +46,11 @@ public class Board implements Serializable {
 		return instance;
 	}
 	
+	public static Board initInstance() {
+		instance = new Board(random.nextInt(limit)+5);
+		return instance;
+	}
+	
 	public int getTrueColumnSize() {
 		int result = 0;
 		for (BoardLine line : lines) {
