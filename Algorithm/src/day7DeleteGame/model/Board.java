@@ -14,6 +14,12 @@ public class Board implements Serializable {
 	private int maxColNum;
 	private boolean isFinish;
 	
+	private Board() {
+		lines.add(new BoardLine(5));
+		lines.add(new BoardLine(12));
+		lines.add(new BoardLine(4));
+	}
+	
 	private Board(int count) {
 		for (int i = 0; i < count; i++) {
 			lines.add(new BoardLine(random.nextInt(limit)+1));
@@ -41,8 +47,10 @@ public class Board implements Serializable {
 	}
 	
 	public static Board getInstance() {
-		if (instance == null)
-			instance = new Board(random.nextInt(limit)+5);
+		if (instance == null) {
+//			instance = new Board(random.nextInt(limit)+5);
+			instance = new Board();
+		}
 		return instance;
 	}
 	
@@ -165,6 +173,31 @@ public class Board implements Serializable {
 				other++;
 		}
 		return only == 1 && other == 0;
+	}
+
+	public int getOneCount() {
+		int count = 0;
+		for (BoardLine line : lines) {
+			if (line.getTrueSize() == 1)
+				count++;
+		}
+		return count;
+	}
+
+	public void switchOtherLine() {
+		int count = 0;
+		for (BoardLine line : lines) {
+			if (line.getTrueSize() != 0)
+				count++;
+		}
+		if (count == 2 && getOneCount() == 1) {
+			for (BoardLine line : lines) {
+				if (line.getTrueSize() > 1) {
+					line.switchState(line.getTrueSize());
+					break;
+				}
+			}
+		}
 	}
 	
 }

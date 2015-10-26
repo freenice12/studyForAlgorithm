@@ -108,7 +108,7 @@ public class GameClientTopicHandler implements MessageListener{
 			mapHandler.setClientsNum(clients.size());
 		List<List<Boolean>> result = mapHandler.modifyMap(selectedPoints, isAuto, canPass);
 		if (result.isEmpty()) {
-			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, result);
+			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, mapHandler.getBoard());
 			object.setPass();
 			connector.sendTempMessage(object);
 		} else {
