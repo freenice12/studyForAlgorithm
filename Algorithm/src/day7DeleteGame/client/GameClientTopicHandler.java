@@ -106,7 +106,7 @@ public class GameClientTopicHandler implements MessageListener{
 	public void sendPoints(Set<Point> selectedPoints, boolean isAuto) {
 		if (isAuto)
 			mapHandler.setClientsNum(clients.size());
-		List<List<Boolean>> result = mapHandler.modifyMap(selectedPoints, isAuto, canPass);
+		List<List<Boolean>> result = mapHandler.getModifiedBoard(selectedPoints, isAuto, canPass);
 		if (result.isEmpty()) {
 			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, mapHandler.getBoard());
 			object.setPass();

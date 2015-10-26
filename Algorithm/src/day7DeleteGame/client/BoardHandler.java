@@ -19,6 +19,10 @@ public class BoardHandler implements GameMapHandler {
 	private Board board;
 	private boolean isChanged = true;
 
+	private HashMap<Integer, List<Integer>> powElemMap;
+	private int deleteIndex;
+	private int deleteCount;
+
 	private int clientsNum;
 
 	public BoardHandler() {
@@ -31,15 +35,17 @@ public class BoardHandler implements GameMapHandler {
 	}
 
 	@Override
-	public List<List<Boolean>> modifyMap(Set<Point> selectedPoints,
+	public List<List<Boolean>> getModifiedBoard(Set<Point> selectedPoints,
 			boolean isAuto, boolean canPass) {
+
 		if (!isAuto) {
 			switchSelectedElement(selectedPoints);
 			return board.getBoard();
 		}
-		if (autoSwitch(canPass))
-			return Collections.EMPTY_LIST;
-		return board.getBoard();
+
+		if (findAnswer(canPass))
+			return board.getBoard();
+		return Collections.EMPTY_LIST;
 	}
 
 	private void switchSelectedElement(Set<Point> selectedPoints) {
@@ -58,99 +64,67 @@ public class BoardHandler implements GameMapHandler {
 		addPowElements((int) (i - Math.pow(2, (int) result)), elemList);
 	}
 
-	private HashMap<Integer, List<Integer>> powElemMap;
-
-	@SuppressWarnings("boxing")
-	private boolean autoSwitch(boolean canPass) {
-
+	private boolean findAnswer(boolean canPass) {
+		// [21,11,18]
 		List<Integer> numArray = board.getTrueSizeArray();
 
 		if (canFinish(numArray)) {
 			board.switchOtherLine();
-			return false;
+			return true;
 		}
 
+		if (findBestSelection(canPass, numArray))
+			return true;
+		return false;
+
+	}
+
+	private boolean findBestSelection(boolean canPass, List<Integer> numArray) {
+		addPowElements(numArray);
+
+		// [1 = 11,2 = 18,0 = 21]
+		Map<Integer, List<Integer>> sortedMap = getSortedPowMap();
+
+		// [1, 2, 0]
+		List<Integer> sortedList = getSortedListByIndex(sortedMap);
+
+		while (hasEven()) {
+			deleteEven(sortedList);
+		}
+
+		findIndexAndCount();
+
+		if (modifyBoard(canPass))
+			return true;
+		return false;
+	}
+
+	private List<Integer> getSortedListByIndex(
+			Map<Integer, List<Integer>> sortedMap) {
+		List<Integer> sortedList = new ArrayList<>();
+		for (Entry<Integer, List<Integer>> entry : sortedMap.entrySet()) {
+			sortedList.add(entry.getKey());
+		}
+		return sortedList;
+	}
+
+	private Map<Integer, List<Integer>> getSortedPowMap() {
+		PowMapSorter sorter = new PowMapSorter(powElemMap);
+		Map<Integer, List<Integer>> sortedMap = new TreeMap<Integer, List<Integer>>(
+				sorter);
+		sortedMap.putAll(powElemMap);
+		// System.out.println(powElemMap);
+		return sortedMap;
+	}
+
+	@SuppressWarnings("boxing")
+	private void addPowElements(List<Integer> numArray) {
 		powElemMap = new HashMap<Integer, List<Integer>>();
 		for (int index = 0; index < numArray.size(); index++) {
 			List<Integer> powElems = new ArrayList<>();
 			addPowElements(numArray.get(index), powElems);
 			powElemMap.put(index, powElems);
 		}
-
-		PowMapSorter sorter = new PowMapSorter(powElemMap);
-		Map<Integer, List<Integer>> sortedMap = new TreeMap<Integer, List<Integer>>(
-				sorter);
-		sortedMap.putAll(powElemMap);
-//		System.out.println(powElemMap);
-
-		List<Integer> sortedList = new ArrayList<>();
-		for (Entry<Integer, List<Integer>> entry : sortedMap.entrySet()) {
-			sortedList.add(entry.getKey());
-		}
-
-		// System.out.println("sorting key: "+sortedList);
-
-		while (hasEven()) {
-			for (int i = 0; i < sortedList.size(); i++) {
-				List<Integer> preElems = powElemMap.get(sortedList.get(i));
-				for (int j = i + 1; j < powElemMap.size(); j++) {
-					List<Integer> nextElems = powElemMap.get(sortedList.get(j));
-					deleteEvenElem(preElems, nextElems);
-					// System.out.println("pre: "+preElems);
-					// System.out.println("next: "+nextElems);
-				}
-			}
-			break;
-		}
-
-		// System.out.println(powElemMap);
-		// int index = 0;
-		// int value = 0;
-		// int max = 0;
-		// int other = 0;
-		// for (Entry<Integer, List<Integer>> entry : powElemMap.entrySet()) {
-		// if ( !entry.getValue().isEmpty() && value <
-		// getPowValue(entry.getKey()) ){
-		// index = entry.getKey();
-		// max = getPowValue(entry.getKey());
-		// } else if (!entry.getValue().isEmpty())
-		// other += getPowValue(entry.getKey());
-		// }
-
-		// 123 되는거 -> 111 되는거
-		// -1은 한줄 지우기 젤 큰거??
-
-		int deleteIndex = 0;
-		int maxValue = 0;
-		int otherValue = 0;
-		for (Entry<Integer, List<Integer>> entry : powElemMap.entrySet()) {
-			if (!entry.getValue().isEmpty()
-					&& maxValue < getPowValue(entry.getKey())) {
-				deleteIndex = entry.getKey();
-				maxValue = getPowValue(entry.getKey());
-			}
-			if (!entry.getValue().isEmpty())
-				otherValue += getPowValue(entry.getKey());
-		}
-
-		int deleteCount = maxValue - (otherValue - maxValue);
-		System.out.println("index: " + deleteIndex + " / count: " + deleteCount);
-
-		if (deleteCount == 0 && canPass) {
-			return true;
-		} else if (deleteCount == 0 && !canPass) {
-			board.switchAt(board.getMaxColNum(), 1);
-		} else if (board.getElementAt(deleteIndex).getTrueSize() == deleteCount
-				&& board.getOneCount() == 2) {
-			board.switchAt(deleteIndex, deleteCount - 1);
-		} else if ((board.getElementAt(deleteIndex).getTrueSize() == deleteCount)) {
-			board.switchAt(deleteIndex, deleteCount);
-		} else {
-			board.switchAt(deleteIndex, deleteCount);
-		}
-
-		return false;
-
 	}
 
 	@SuppressWarnings("boxing")
@@ -158,65 +132,95 @@ public class BoardHandler implements GameMapHandler {
 		int count = 0;
 		for (Integer num : numArray) {
 			if (num != 0)
-				count ++;
+				count++;
 		}
 		if (count == 2 && board.getOneCount() == 1)
 			return true;
 		return false;
 	}
 
-	private void deleteEvenElem(List<Integer> preElems, List<Integer> nextElems) {
-		Iterator<Integer> preElemsIter = preElems.iterator();
-		while (preElemsIter.hasNext()) {
-			Integer pre = preElemsIter.next();
-			Iterator<Integer> nextElemsIter = nextElems.iterator();
-			while (nextElemsIter.hasNext()) {
-				Integer next = nextElemsIter.next();
-				if (pre.equals(next)) {
-					preElemsIter.remove();
-					nextElemsIter.remove();
-				}
-			}
-		}
-	}
-
 	@SuppressWarnings("boxing")
 	private boolean hasEven() {
 		for (int i = 0; i < powElemMap.size(); i++) {
-			List<Integer> preElems = powElemMap.get(i);
+			List<Integer> prePowElems = powElemMap.get(i);
 			for (int j = i + 1; j < powElemMap.size(); j++) {
-				List<Integer> nextElems = powElemMap.get(j);
-				if (compareEachElem(preElems, nextElems))
+				List<Integer> nextPowElems = powElemMap.get(j);
+				if (compareElems(prePowElems, nextPowElems))
 					return true;
 			}
 		}
 		return false;
 	}
-
-	private boolean compareEachElem(List<Integer> preElems,
-			List<Integer> nextElems) {
+	
+	private boolean compareElems(List<Integer> preElems, List<Integer> nextElems) {
 		for (Integer smallElem : preElems) {
 			if (nextElems.contains(smallElem))
 				return true;
 		}
 		return false;
 	}
-
-	// private void autoSwitch() {
-	// Another algorithm
-	// int targetCol = board.getMaxColNum();
-	// int elementSize = board.getEnableElementSize(targetCol);
-	// if (board.getTrueColumnSize() > clientsNum + 1) {
-	// board.switchAt(targetCol, elementSize);
-	// } else if (board.getTrueColumnSize() == clientsNum + 1 && elementSize > 1
-	// || elementSize > 1) {
-	// board.switchAt(targetCol, elementSize - 1);
-	// } else if(board.checkFinish()) {
-	// isChanged = false;
-	// } else {
-	// board.switchAt(targetCol, elementSize);
-	// }
-	// }
+	
+	private void deleteEven(List<Integer> sortedList) {
+		for (int i = 0; i < sortedList.size(); i++) {
+			List<Integer> preElems = powElemMap.get(sortedList.get(i));
+			for (int j = i + 1; j < powElemMap.size(); j++) {
+				List<Integer> nextElems = powElemMap.get(sortedList.get(j));
+				deleteEvenElem(preElems, nextElems);
+				// System.out.println("pre: "+preElems);
+				// System.out.println("next: "+nextElems);
+			}
+		}
+	}
+	
+	private void deleteEvenElem(List<Integer> preElems, List<Integer> nextElems) {
+		Iterator<Integer> preExponentIter = preElems.iterator();
+		while (preExponentIter.hasNext()) {
+			Integer preExponent = preExponentIter.next();
+			Iterator<Integer> nextExponentIter = nextElems.iterator();
+			while (nextExponentIter.hasNext()) {
+				Integer nextExponent = nextExponentIter.next();
+				if (preExponent.equals(nextExponent)) {
+					preExponentIter.remove();
+					nextExponentIter.remove();
+				}
+			}
+		}
+	}
+	
+	@SuppressWarnings("boxing")
+	private void findIndexAndCount() {
+		deleteIndex = 0;
+		int maxValue = 0;
+		int otherValue = 0;
+		int powValue = 0;
+		for (Entry<Integer, List<Integer>> entry : powElemMap.entrySet()) {
+//			int powValue = getPowValue(entry.getKey());
+			powValue = getPowValue(entry.getKey());
+			if (!entry.getValue().isEmpty() && maxValue < powValue) {
+				deleteIndex = entry.getKey();
+				maxValue = powValue;
+			}
+			if (!entry.getValue().isEmpty())
+				otherValue += powValue;
+		}
+		deleteCount = 2 * maxValue - otherValue;
+		
+//		deleteCount = maxValue - (otherValue - maxValue);
+		// System.out.println("index: " + deleteIndex + " / count: " + deleteCount);
+	}
+	
+	private boolean modifyBoard(boolean canPass) {
+		if (deleteCount == 0 && canPass) {
+			return false;
+		} else if (deleteCount == 0 && !canPass) {
+			board.switchAt(board.getMaxColNum(), 1);
+		} else if (board.getElementAt(deleteIndex).getTrueSize() == deleteCount	&& board.getOneCount() == 2) {
+			board.switchAt(deleteIndex, deleteCount - 1);
+		} else {
+			board.switchAt(deleteIndex, deleteCount);
+		}
+		return true;
+	}
 
 	@Override
 	public List<List<Boolean>> getBoard() {
@@ -233,6 +237,10 @@ public class BoardHandler implements GameMapHandler {
 		this.clientsNum = size;
 	}
 
+	public int getClientsNum() {
+		return clientsNum;
+	}
+
 	@Override
 	public String toString() {
 		return board.toString();
@@ -247,6 +255,14 @@ public class BoardHandler implements GameMapHandler {
 		return result;
 	}
 
+	public int getDeleteIndex() {
+		return deleteIndex;
+	}
+
+	public int getDeleteCount() {
+		return deleteCount;
+	}
+
 }
 
 class PowMapSorter implements Comparator<Integer> {
@@ -255,16 +271,6 @@ class PowMapSorter implements Comparator<Integer> {
 	public PowMapSorter(Map<Integer, List<Integer>> base) {
 		this.base = base;
 	}
-
-	// // Note: this comparator imposes orderings that are inconsistent with
-	// // equals.
-	// public int compare(String a, String b) {
-	// if (base.get(a) >= base.get(b)) {
-	// return -1;
-	// } else {
-	// return 1;
-	// } // returning 0 would merge keys
-	// }
 
 	@Override
 	public int compare(Integer o1, Integer o2) {
@@ -283,4 +289,5 @@ class PowMapSorter implements Comparator<Integer> {
 		}
 		return result;
 	}
+
 }

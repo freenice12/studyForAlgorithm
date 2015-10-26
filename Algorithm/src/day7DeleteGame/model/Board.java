@@ -15,9 +15,9 @@ public class Board implements Serializable {
 	private boolean isFinish;
 	
 	private Board() {
-		lines.add(new BoardLine(5));
-		lines.add(new BoardLine(12));
-		lines.add(new BoardLine(4));
+		lines.add(new BoardLine(6));
+		lines.add(new BoardLine(2));
+		lines.add(new BoardLine(9));
 	}
 	
 	private Board(int count) {
@@ -48,8 +48,8 @@ public class Board implements Serializable {
 	
 	public static Board getInstance() {
 		if (instance == null) {
-//			instance = new Board(random.nextInt(limit)+5);
-			instance = new Board();
+			instance = new Board(random.nextInt(limit)+5);
+//			instance = new Board();
 		}
 		return instance;
 	}
