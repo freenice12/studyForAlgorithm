@@ -31,11 +31,11 @@ public class ClientViewHandler {
 		display = new Display();
 	    shell = new Shell(display);
 	    shell.setText("Plain Map");
-	    shell.setLayout(new GridLayout(1, false));
+	    shell.setLayout(new GridLayout(2, false));
 	    
 	    mainComposite = new Composite(shell, SWT.BORDER);
 	    GridLayout gridLayout = new GridLayout();
-	    gridLayout.numColumns = 1;
+	    gridLayout.numColumns = 2;
 	    gridLayout.makeColumnsEqualWidth = false;
 	    mainComposite.setLayout(gridLayout);
 	    mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

@@ -18,6 +18,7 @@ public class Board implements Serializable {
 		lines.add(new BoardLine(6));
 		lines.add(new BoardLine(2));
 		lines.add(new BoardLine(9));
+//		lines.get(0).switchStateAt(2);
 	}
 	
 	private Board(int count) {
@@ -48,8 +49,8 @@ public class Board implements Serializable {
 	
 	public static Board getInstance() {
 		if (instance == null) {
-			instance = new Board(random.nextInt(limit)+5);
-//			instance = new Board();
+//			instance = new Board(random.nextInt(limit)+5);
+			instance = new Board();
 		}
 		return instance;
 	}

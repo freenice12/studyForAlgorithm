@@ -3,6 +3,7 @@ package day7DeleteGame.client;
 import javax.jms.Session;
 
 import common.message.InitRequestMessage;
+
 import day7DeleteGame.client.ui.ClientViewHandler;
 import day7DeleteGame.util.ActivemqConnector;
 
