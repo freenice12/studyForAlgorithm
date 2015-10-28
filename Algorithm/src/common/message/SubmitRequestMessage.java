@@ -3,8 +3,6 @@ package common.message;
 import java.util.List;
 import java.util.UUID;
 
-
-
 public class SubmitRequestMessage extends RequestMessage {
 
 	private static final long serialVersionUID = 14L;

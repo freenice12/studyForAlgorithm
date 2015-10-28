@@ -1,5 +1,9 @@
 package day7DeleteGame.client.ui;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -11,17 +15,23 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+
+import common.model.UserInfo;
 
 public class StatusComposite extends Composite implements PaintListener {
 	static final Color BACKGROUND = Display.getDefault().getSystemColor(
 			SWT.COLOR_WIDGET_BACKGROUND);
 	static final Color RED = Display.getDefault().getSystemColor(SWT.COLOR_RED);
+	static final Color BLUE = Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+	static final Color BLACK = Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
 	private NewClientView view;
-	private Canvas canvas;
+	protected Canvas canvas;
 	private GC gc;
-	private int width;
-	private int height;
-	private String userID;
+	private String nextId;
+	private List<UserInfo> userInfos = new ArrayList<>();
+	private List<Label> clientsLabel = new ArrayList<>();
+	private int turn;
 
 	StatusComposite(NewClientView clientView) {
 		super(clientView.mainComposite, SWT.BORDER);
@@ -39,45 +49,81 @@ public class StatusComposite extends Composite implements PaintListener {
 		setLayoutData(gridData);
 		createStateContent();
 	}
+	
+	public void setClientsLabel(final String id, Collection<UserInfo> clients) {
+		if (id.isEmpty()) {
+			userInfos.addAll(clients);
+			return;
+		}
+		int index = 0;
+		for (final UserInfo client : clients) {
+			final Label clientLabel = clientsLabel.get(index++);
+			Display.getDefault().syncExec(new Runnable() {
 
-	public void updateStatus(final String userId, final String next, final int turnCount) {
-		userID = userId;
+				@Override
+				public void run() {
+					clientLabel.setAlignment(SWT.CENTER);
+					clientLabel.setText(client.getName());
+					if (id.equals(client)) {
+						clientLabel.setForeground(getDisplay().getSystemColor(
+								SWT.COLOR_RED));
+					} else {
+						clientLabel.setForeground(getDisplay().getSystemColor(
+								SWT.COLOR_BLACK));
+					}
+				}
+			});
+		}
 		canvas.update();
-//		Display.getDefault().syncExec(new Runnable() {
-//			@Override
-//			public void run() {
-//				if (userId.equals(next))
-//					statusLabel.setText("My Id: " + userId + "\tTurn: " + turnCount+ "\t\t\t My turn: O");
-//				else 
-//					statusLabel.setText("My Id: " + userId + "\tTurn: " + turnCount+ "\t\t\t My turn: X");
-//			}
-//		});
 	}
 	
+	private int getMaxWidth() {
+		int max = 0;
+		for (UserInfo info : userInfos) {
+			Point textSize = gc.textExtent(info.getName());
+			if (max < textSize.x)
+				max = textSize.x;
+		}
+		return max;
+	}
+
 	@Override
 	public void paintControl(PaintEvent paintevent) {
 		gc = new GC(canvas);
 		prepareCanvas();
-		paintevent.gc.setForeground(RED);
-//        Rectangle rect = canvas.getClientArea();
-//        gc.drawRectangle(rect.x, rect.y , rect.width - 2, rect.height - 2);
-        String string = "User id \t Client \t UUID";
-        Point textSize = paintevent.gc.textExtent(string);
-//        paintevent.gc.drawRectangle(canvas.getClientArea().x, (canvas.getClientArea().height - textSize.y)/2 + 5 , textSize.x + 5, textSize.y + 5);
-        paintevent.gc.drawText(string, 2, 2);
-//        e.gc.drawText(text, (canvas.getSize().x - textSize.x)/2, (canvas.getSize().y - textSize.y)/2);
+		
+		
+		int x = 0;
+		int y = 0;
+		int indent = 20;
+		for (UserInfo info : userInfos) {
+			if (info.getName().equals(nextId))
+				paintevent.gc.setForeground(RED);
+			else
+				paintevent.gc.setForeground(BLACK);
+				
+			Point textSize = paintevent.gc.textExtent(info.getName());
+//			if (x == 0)
+//				x += indent;
+//			else
+			x += getMaxWidth()+indent;
+			y = (canvas.getClientArea().height - textSize.y)/2;
+			paintevent.gc.drawString(info.getName(), x, y);
+			if (info.getName().equals(nextId))
+				paintevent.gc.drawRectangle(x - 10, y - 2, textSize.x + indent, textSize.y + 5);
+		}
+		paintevent.gc.drawString("Turn: "+turn, 5, y);
+		
 	}
 	
 	protected void prepareCanvas() {
 		gc.setBackground(BACKGROUND);
 		gc.fillRectangle(canvas.getClientArea());
-		width = canvas.getClientArea().width;
-		height = canvas.getClientArea().height;
-		gc.dispose();
 	}
 	
 	private void createStateContent() {
-		canvas = new Canvas(this, SWT.NO_BACKGROUND);
+//		canvas = new Canvas(this, SWT.NO_BACKGROUND);
+		canvas = new Canvas(this, SWT.BORDER);
 		
 		GridData gridData = new GridData();
 		gridData.horizontalSpan = 4;
@@ -89,6 +135,30 @@ public class StatusComposite extends Composite implements PaintListener {
 
 		canvas.addPaintListener(this);
 		
+	}
+	
+	public void updateStatus(final String id, Collection<UserInfo> clientInfos) {
+		if (id.isEmpty()) {
+			userInfos.addAll(clientInfos);
+			return;
+		}
+		nextId = id;
+		canvasRedraw();
+	}
+
+	private void canvasRedraw() {
+		Display.getDefault().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				canvas.redraw();
+			}
+		});
+	}
+
+	public void updateTurn(int turnCount) {
+		turn = turnCount;
+		canvasRedraw();
 	}
 
 }

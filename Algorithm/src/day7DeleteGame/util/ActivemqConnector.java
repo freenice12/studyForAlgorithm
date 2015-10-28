@@ -138,6 +138,16 @@ public class ActivemqConnector implements MqConnector {
 		}
 	}
 	
+	public MessageListener getTopicHandler() {
+		MessageListener listener = null;
+		try {
+			listener = topicConsumer.getMessageListener();
+		} catch (JMSException e) {
+			e.printStackTrace();
+		}
+		return listener;
+	}
+	
 	public Session getSession() {
 		try {
 			checkSession();

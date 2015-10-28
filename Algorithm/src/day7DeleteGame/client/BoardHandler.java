@@ -16,12 +16,12 @@ import org.eclipse.swt.graphics.Point;
 import day7DeleteGame.model.Board;
 
 public class BoardHandler implements GameMapHandler {
-	private Board board;
+	public Board board;
 	private boolean isChanged = true;
 
 	private HashMap<Integer, List<Integer>> powElemMap;
-	private int deleteIndex;
-	private int deleteCount;
+	public int deleteIndex;
+	public int deleteCount;
 
 	private int clientsNum;
 
@@ -48,7 +48,7 @@ public class BoardHandler implements GameMapHandler {
 		return Collections.EMPTY_LIST;
 	}
 
-	private void switchSelectedElement(Set<Point> selectedPoints) {
+	public void switchSelectedElement(Set<Point> selectedPoints) {
 		for (Point point : selectedPoints) {
 			board.switchElementAt(point.x, point.y);
 		}
@@ -64,7 +64,7 @@ public class BoardHandler implements GameMapHandler {
 		addPowElements((int) (i - Math.pow(2, (int) result)), elemList);
 	}
 
-	private boolean findAnswer(boolean canPass) {
+	public boolean findAnswer(boolean canPass) {
 		// [21,11,18]
 		List<Integer> numArray = board.getTrueSizeArray();
 
@@ -94,9 +94,12 @@ public class BoardHandler implements GameMapHandler {
 
 		findIndexAndCount();
 
-		if (modifyBoard(canPass))
-			return true;
-		return false;
+		if (deleteCount == 0)
+			return false;
+		return true;
+//		if (modifyBoard(canPass))
+//			return true;
+//		return false;
 	}
 
 	private List<Integer> getSortedListByIndex(
@@ -209,7 +212,7 @@ public class BoardHandler implements GameMapHandler {
 		// System.out.println("index: " + deleteIndex + " / count: " + deleteCount);
 	}
 	
-	private boolean modifyBoard(boolean canPass) {
+	public boolean modifyBoard(boolean canPass) {
 		if (deleteCount == 0 && canPass) {
 			return false;
 		} else if (deleteCount == 0 && !canPass) {

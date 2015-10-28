@@ -1,18 +1,18 @@
 package common.message.topic;
 
 import java.io.Serializable;
-import java.util.UUID;
+import java.util.List;
 
 public class EndTopicMessage implements Serializable {
 
 	private static final long serialVersionUID = 22L;
-	private UUID uuid;
+	private List<String> winnerIDList;
 
-	public EndTopicMessage(UUID uuid) {
-		this.uuid = uuid;
+	public EndTopicMessage(List<String> winnerIDList) {
+		this.winnerIDList = winnerIDList;
 	}
 	
-	public UUID getLoserUser() {
-		return uuid;
+	public List<String> getWinnerIDList() {
+		return winnerIDList;
 	}
 }

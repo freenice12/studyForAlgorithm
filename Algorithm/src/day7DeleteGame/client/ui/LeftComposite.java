@@ -2,6 +2,8 @@ package day7DeleteGame.client.ui;
 
 import java.util.HashMap;
 
+import javax.jms.Session;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -16,6 +18,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import common.message.HeartBeatRequestMessage;
+import common.message.InitRequestMessage;
+import day7DeleteGame.client.GameClientTopicHandler;
+import day7DeleteGame.util.ActivemqConnector;
+
 public class LeftComposite extends Composite {
 	private static final String IP = "IP";
 	private static final String PORT = "Port";
@@ -24,7 +31,7 @@ public class LeftComposite extends Composite {
 	private static final String QUEUE = "Queue";
 	static final Color RED = Display.getDefault().getSystemColor(SWT.COLOR_RED);
 	static final Color GREEN = Display.getDefault().getSystemColor(SWT.COLOR_GREEN);
-	private NewClientView view;
+	protected NewClientView view;
 	protected HashMap<String, Text> textMap = new HashMap<String, Text>();
 	protected Label connectState;
 	
@@ -126,6 +133,7 @@ public class LeftComposite extends Composite {
 		connectState.setLayoutData(gridData);
 	}
 	
+	protected ActivemqConnector connector;
 	private void createConnectButton() {
 		connectButton = new Button(this, SWT.PUSH);
 		connectButton.setText("Connect");
@@ -135,6 +143,7 @@ public class LeftComposite extends Composite {
 		connectButton.setLayoutData(gridData);
 		connectButton.addMouseListener(new MouseAdapter() {
 			
+
 			@Override
 			public void mouseDown(MouseEvent mouseevent) {
 				if (isConnected) {
@@ -142,15 +151,30 @@ public class LeftComposite extends Composite {
 					connectButton.setText("Connect");
 					isConnected = false;
 				} else {
-					System.out.println("Address: tcp://"+textMap.get(IP).getText()+":"+textMap.get(PORT).getText());
-					System.out.println("Name: "+textMap.get(NAME).getText());
-					System.out.println("Topic: "+textMap.get(TOPIC).getText());
-					System.out.println("Queue: "+textMap.get(QUEUE).getText());
+//					System.out.println("Address: tcp://"+textMap.get(IP).getText()+":"+textMap.get(PORT).getText());
+//					System.out.println("Name: "+textMap.get(NAME).getText());
+//					System.out.println("Topic: "+textMap.get(TOPIC).getText());
+//					System.out.println("Queue: "+textMap.get(QUEUE).getText());
+					connect();
+					
 					connectState.setBackground(GREEN);
 					connectButton.setText("Disconnect");
 					isConnected = true;
 				}
 				super.mouseDown(mouseevent);
+			}
+
+			private void connect() {
+				connector = new ActivemqConnector(textMap.get(IP).getText(), Integer.parseInt(textMap.get(PORT).getText()), false, Session.AUTO_ACKNOWLEDGE);
+				connector.createTopic(textMap.get(TOPIC).getText());
+				connector.setDestination(textMap.get(QUEUE).getText());
+				connector.createMessageProducer();
+				connector.setTempMessageHandler(view.messageHandler);
+				connector.setTopicHandler(new GameClientTopicHandler(connector, view));
+				view.messageHandler.setTopicHandler(connector.getTopicHandler());
+				view.setTopicHandler(connector.getTopicHandler());
+				connector.sendTempMessage(new HeartBeatRequestMessage(view.uuid));
+				connector.sendTempMessage(new InitRequestMessage(view.uuid,textMap.get(NAME).getText()));
 			}
 			
 		});

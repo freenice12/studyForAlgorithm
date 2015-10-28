@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
+import common.model.UserInfo;
+
 public class ButtonComposite extends Composite {
 
 	private Composite composite;
@@ -72,16 +74,6 @@ public class ButtonComposite extends Composite {
 		createPassButton(gd);
 	}
 
-	private void createClientsLabel() {
-		for (int i = 0; i < 4; i++) {
-			Label clientLabel = new Label(composite, SWT.NONE);
-			GridData grid = getLabelGridData();
-			clientLabel.setLayoutData(grid);
-//			clientLabel.pack();
-			clientsLabel.add(clientLabel);
-		}
-	}
-
 	private void createPassButton(GridData gd) {
 		passButton = new Button(composite, SWT.PUSH);
 		passButton.setText("Pass");
@@ -112,13 +104,22 @@ public class ButtonComposite extends Composite {
 		readyButton.setLayoutData(gd);
 		readyButton.addMouseListener(new ReadyListener(this));
 	}
+	
+	private void createClientsLabel() {
+		for (int i = 0; i < 4; i++) {
+			Label clientLabel = new Label(composite, SWT.NONE);
+			GridData grid = getLabelGridData();
+			clientLabel.setLayoutData(grid);
+//			clientLabel.pack();
+			clientsLabel.add(clientLabel);
+		}
+	}
 
 	private GridData getLabelGridData() {
 		GridData gridData = new GridData(SWT.MEDIUM, SWT.FILL, false, false);
 		gridData.widthHint = 430 / 4;
 		gridData.heightHint = 30;
 		gridData.verticalAlignment = SWT.CENTER;
-//		gridData.horizontalSpan = 1;
 		return gridData;
 	}
 
@@ -133,18 +134,18 @@ public class ButtonComposite extends Composite {
 		readyButton.setEnabled(false);
 	}
 
-	public void setClientsLabel(final String id, Collection<String> clients) {
+	public void setClientsLabel(final String id, Collection<UserInfo> clients) {
 		if (id.isEmpty())
 			return;
 		int index = 0;
-		for (final String client : clients) {
+		for (final UserInfo client : clients) {
 			final Label clientLabel = clientsLabel.get(index++);
 			Display.getDefault().syncExec(new Runnable() {
 
 				@Override
 				public void run() {
 					clientLabel.setAlignment(SWT.CENTER);
-					clientLabel.setText(client);
+					clientLabel.setText(client.getName());
 					if (id.equals(client)) {
 						clientLabel.setForeground(getDisplay().getSystemColor(
 								SWT.COLOR_RED));

@@ -5,22 +5,18 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 
 public class ButtonsComposite extends Composite implements PaintListener{
 	
-	private NewClientView view;
-	private Button passButton;
-	private Button autoButton;
-	private Button sendButton;
-	private Button readyButton;
-	private Canvas canvas;
-	private GC gc;
+	protected NewClientView view;
+	protected Button passButton;
+	protected Button autoButton;
+	protected Button sendButton;
+	protected Button readyButton;
 	
 	public ButtonsComposite(NewClientView clientView) {
 		super(clientView.mainComposite, SWT.BORDER);
@@ -78,6 +74,8 @@ public class ButtonsComposite extends Composite implements PaintListener{
 
 			@Override
 			public void mouseDown(MouseEvent mouseevent) {
+				passButton.setEnabled(false);
+				view.sendPass();
 				super.mouseDown(mouseevent);
 			}
 			
@@ -91,14 +89,19 @@ public class ButtonsComposite extends Composite implements PaintListener{
 		autoButton.setEnabled(false);
 		autoButton.addMouseListener(new MouseAdapter() {
 
+
 			@Override
 			public void mouseDown(MouseEvent mouseevent) {
+				if (canPass)
+					sendButton.setEnabled(true);
+				view.showBest();
 				super.mouseDown(mouseevent);
 			}
 			
 		});
 	}
 
+	protected boolean canPass = true;
 	private void createSendButton(GridData gd) {
 		sendButton = new Button(this, SWT.PUSH);
 		sendButton.setText("Send");
@@ -106,8 +109,11 @@ public class ButtonsComposite extends Composite implements PaintListener{
 		sendButton.setEnabled(false);
 		sendButton.addMouseListener(new MouseAdapter() {
 
+
 			@Override
 			public void mouseDown(MouseEvent mouseevent) {
+				canPass = false;
+				view.sendPoints();
 				super.mouseDown(mouseevent);
 			}
 			
@@ -122,6 +128,8 @@ public class ButtonsComposite extends Composite implements PaintListener{
 
 			@Override
 			public void mouseDown(MouseEvent mouseevent) {
+				readyButton.setEnabled(false);
+				view.sendReady();
 				super.mouseDown(mouseevent);
 			}
 			
@@ -131,6 +139,25 @@ public class ButtonsComposite extends Composite implements PaintListener{
 	@Override
 	public void paintControl(PaintEvent paintevent) {
 		
+	}
+
+	public void enableAutoButton(boolean b) {
+		autoButton.setEnabled(b);
+	}
+
+	public void enablePassButton(boolean b) {
+		if (canPass)
+			passButton.setEnabled(b);
+		else
+			passButton.setEnabled(false);
+	}
+
+	public void enableSendButton(boolean b) {
+		sendButton.setEnabled(b);
+	}
+
+	public void enableReadyButton(boolean b) {
+		readyButton.setEnabled(b);
 	}
 
 }

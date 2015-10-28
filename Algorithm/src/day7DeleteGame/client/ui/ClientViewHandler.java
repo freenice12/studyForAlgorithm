@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import common.model.UserInfo;
+
 import day7DeleteGame.client.GameClientTopicHandler;
 import day7DeleteGame.model.Board;
 
@@ -30,7 +32,7 @@ public class ClientViewHandler {
 		this.clientHandler = clientHandler;
 		display = new Display();
 	    shell = new Shell(display);
-	    shell.setText("Plain Map");
+	    shell.setText("Map");
 	    shell.setLayout(new GridLayout(2, false));
 	    
 	    mainComposite = new Composite(shell, SWT.BORDER);
@@ -62,12 +64,12 @@ public class ClientViewHandler {
 	}
 	
 	public void sendReady() {
-		if (reGame)
-			clientHandler.sendInit();
+//		if (reGame)
+//			clientHandler.sendInit();
 		clientHandler.sendReady();
 	}
 	
-	public void updateLabel(String id, Collection<String> clients) {
+	public void updateLabel(String id, Collection<UserInfo> clients) {
 		buttonComposite.setClientsLabel(id, clients);
 	}
 
@@ -84,7 +86,7 @@ public class ClientViewHandler {
 	}
 
 	public void sendPoints(Set<Point> selectedPoints, boolean isAuto) {
-		clientHandler.sendPoints(selectedPoints, isAuto);
+//		clientHandler.sendPoints(selectedPoints);
 	}
 
 	public void pointRepoInit() {
@@ -110,7 +112,7 @@ public class ClientViewHandler {
 	}
 
 	public void sendPass() {
-		clientHandler.sendPass();
+//		clientHandler.sendPass();
 	}
 
 	public void updateInfo(int turnCount, String next) {

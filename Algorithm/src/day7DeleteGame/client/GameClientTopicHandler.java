@@ -13,26 +13,29 @@ import javax.jms.ObjectMessage;
 
 import org.eclipse.swt.graphics.Point;
 
-import common.message.InitRequestMessage;
 import common.message.ReadyRequestMessage;
 import common.message.SubmitRequestMessage;
 import common.message.topic.EndTopicMessage;
 import common.message.topic.StartTopicMessage;
 import common.message.topic.TurnTopicMessage;
-import day7DeleteGame.client.ui.ClientViewHandler;
+import common.model.UserInfo;
+
+import day7DeleteGame.client.ui.NewClientView;
 import day7DeleteGame.util.ActivemqConnector;
 
 public class GameClientTopicHandler implements MessageListener{
 	
-	private ClientViewHandler viewHandler;
-	private GameMapHandler mapHandler;
+	private NewClientView view;
+//	private GameMapHandler mapHandler;
 	private ActivemqConnector connector;
-	private Map<UUID, String> clients;
+	private Map<UUID, UserInfo> clients;
 	private boolean canPass = true;
 	
-	public GameClientTopicHandler(ActivemqConnector conn) {
+	public GameClientTopicHandler(ActivemqConnector conn, NewClientView view) {
 		this.connector = conn;
-		this.mapHandler = new BoardHandler();
+		this.view = view;
+//		this.mapHandler = new BoardHandler();
+		
 	}
 
 	@Override
@@ -53,86 +56,90 @@ public class GameClientTopicHandler implements MessageListener{
 			e.printStackTrace();
 		}
 	}
-
-	private void endGame(Object messageObj) {
-		viewHandler.showResult(viewHandler.uuid, ((EndTopicMessage) messageObj).getLoserUser());
+	
+	private void readyToStart(Object messageObj) {
+		clients = new LinkedHashMap<UUID, UserInfo>();
+		clients.putAll(((StartTopicMessage) messageObj).getUserMap());
+		view.updateStatus("", clients.values());
 	}
 
 	private void continueGame(Object messageObj) {
-		viewHandler.updateView(mapHandler.convertToBoard(((TurnTopicMessage) messageObj).getList()));
-		String next = getNext(((TurnTopicMessage) messageObj).getUuid());
+		view.updateView(((TurnTopicMessage) messageObj).getMapList());
+		String next = getNext(((TurnTopicMessage) messageObj).getCurrentTurnUUID());
 		if (next != null) {
-			viewHandler.updateInfo(((TurnTopicMessage) messageObj).getTurnCount(), next);
-			viewHandler.updateLabel(next, clients.values());
+			view.updateInfo(((TurnTopicMessage) messageObj).getTurnCount());
+			view.updateStatus(next, clients.values());
 		}
 		controlButtons(next);
 	}
 
-	private void readyToStart(Object messageObj) {
-		clients = new LinkedHashMap<UUID, String>();
-		clients.putAll(((StartTopicMessage) messageObj).getUserMap());
-		if (clients.get(viewHandler.uuid) != null)
-			viewHandler.setUserId(clients.get(viewHandler.uuid));
-		viewHandler.updateLabel("", clients.values());
-	}
-
 	public void controlButtons(String next) {
-		if (next != null && next.equals(clients.get(viewHandler.uuid))) {
-			viewHandler.enableAutoButton(true);
+		if (next != null && next.equals(clients.get(view.uuid).getName())) {
+			view.enableAutoButton(true);
 			if (canPass) {
-				viewHandler.enablePassButton(true);
+				view.enablePassButton(true);
 			}
-			viewHandler.enableGameComposite(true);
+			view.enableGameComposite(true);
 		} else {
-			viewHandler.enableSendButton(false);
-			viewHandler.enableAutoButton(false);
-			viewHandler.enablePassButton(false);
-			viewHandler.enableGameComposite(false);
+			view.enableSendButton(false);
+			view.enableAutoButton(false);
+			view.enablePassButton(false);
+			view.enableGameComposite(false);
 		}
 	}
 		
 	public String getNext(UUID uuid) {
-		return clients.get(uuid);
+		UserInfo userInfo = clients.get(uuid);
+		if (userInfo != null)
+			return userInfo.getName();
+		return null;
 	}
 	
 	public void sendReady() {
-		connector.sendTempMessage(new ReadyRequestMessage(viewHandler.uuid));
+		connector.sendTempMessage(new ReadyRequestMessage(view.uuid));
 	}
 
-	public void setViewer(ClientViewHandler viewer) {
-		this.viewHandler = viewer;
-	}
+//	public void setViewer(ClientViewHandler viewer) {
+//		this.view = viewer;
+//	}
 
-	public void sendPoints(Set<Point> selectedPoints, boolean isAuto) {
-		if (isAuto)
-			mapHandler.setClientsNum(clients.size());
-		List<List<Boolean>> result = mapHandler.getModifiedBoard(selectedPoints, isAuto, canPass);
-		if (result.isEmpty()) {
-			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, mapHandler.getBoard());
+	public void sendPoints(List<List<Boolean>> maps) {
+//		if (isAuto)
+//			mapHandler.setClientsNum(clients.size());
+//		List<List<Boolean>> result = mapHandler.getModifiedBoard(selectedPoints, isAuto, canPass);
+		if (maps.isEmpty()) {
+			SubmitRequestMessage object = new SubmitRequestMessage(view.uuid, maps);
 			object.setPass();
 			connector.sendTempMessage(object);
 		} else {
-			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, result);
+			SubmitRequestMessage object = new SubmitRequestMessage(view.uuid, maps);
 			connector.sendTempMessage(object);
 		}
 		this.canPass = false;
 	}
 
 	public String getTurn(UUID uuid) {
-		return clients.get(uuid);
+		return clients.get(uuid).getName();
 	}
 
-	public void sendPass() {
+	public void sendPass(List<List<Boolean>> maps) {
 		if (canPass) {
 			canPass = false;
-			SubmitRequestMessage object = new SubmitRequestMessage(viewHandler.uuid, mapHandler.getBoard());
+			SubmitRequestMessage object = new SubmitRequestMessage(view.uuid, maps);
 			object.setPass();
 			connector.sendTempMessage(object);
 		}
 	}
-
-	public void sendInit() {
-		connector.sendTempMessage(new InitRequestMessage(viewHandler.uuid));
+	
+	private void endGame(Object messageObj) {
+		if (((EndTopicMessage) messageObj).getWinnerIDList().contains(clients.get(view.uuid).getName())) {
+			view.showResult(true);
+		} else
+			view.showResult(false);
 	}
+
+//	public void sendInit() {
+//		connector.sendTempMessage(new InitRequestMessage(view.uuid,""));
+//	}
 
 }
