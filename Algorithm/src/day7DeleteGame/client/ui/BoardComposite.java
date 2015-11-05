@@ -12,6 +12,7 @@ import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -47,6 +48,8 @@ public class BoardComposite extends Composite implements PaintListener,
 	private Map<Point, Boolean> selectedPoints = new HashMap<>();
 	private int maxXsize;
 	private int maxYsize;
+	private boolean changed;
+	private List<Rectangle> recs = new ArrayList<>();
 
 	public BoardComposite(NewClientView clientView) {
 		super(clientView.mainComposite, SWT.BORDER);
@@ -88,9 +91,6 @@ public class BoardComposite extends Composite implements PaintListener,
 		if (board == null)
 			return;
 		selectedPoints.clear();
-		System.out.println("changed1=============");
-		System.out.println(board);
-		System.out.println("changed1=============");
 		for (int col = 0; col < board.getSize(); col++) {
 			for (int row = 0; row < board.getElementSize(col); row++) {
 				BoardLine line = board.getElementAt(col);
@@ -99,6 +99,7 @@ public class BoardComposite extends Composite implements PaintListener,
 				Region region = new Region();
 				region.add(rec);
 				regions.add(region);
+				recs .add(rec);
 				Point enable = new Point(col, row);
 				if (element.equals(Boolean.TRUE)) {
 					enablePoints.put(enable, Boolean.TRUE);
@@ -116,6 +117,7 @@ public class BoardComposite extends Composite implements PaintListener,
 
 	protected void prepareCanvas() {
 		gc.setBackground(BACKGROUND);
+		gc.setAlpha(255);
 		gc.fillRectangle(canvas.getClientArea());
 		width = canvas.getClientArea().width;
 		height = canvas.getClientArea().height;
@@ -140,13 +142,13 @@ public class BoardComposite extends Composite implements PaintListener,
 	@Override
 	public void mouseDown(MouseEvent e) {
 		boolean find = false;
-		for (Region region : regions) {
-			if (region.getBounds().contains(e.x, e.y)) {
-				int col = region.getBounds().x / getWidth();
-				int row = region.getBounds().y / getHight();
+		for (Rectangle rec : recs) {
+			if (rec.contains(e.x, e.y)) {
+				int col = rec.x / getWidth();
+				int row = rec.y / getHight();
 				Point checkPoint = new Point(col, row);
-//				System.out.println("checkPoint: "+checkPoint);
 				if (enablePoints.containsKey(checkPoint)) {
+					changed = true;
 					view.enableSendButton(true);
 					find = true;
 					if (!selectedPoints.containsKey(checkPoint)) {
@@ -154,12 +156,13 @@ public class BoardComposite extends Composite implements PaintListener,
 							if (!isTheSameCol(checkPoint, point))
 								return;
 						}
-						changeSelectedRegion(region, true);
+						changeSelectedRegion(rec, true);
 						selectedPoints.put(checkPoint, Boolean.FALSE);
 					} else {
-						changeSelectedRegion(region, false);
+						changeSelectedRegion(rec, false);
 						selectedPoints.remove(checkPoint);
 						if (selectedPoints.isEmpty()) {
+							changed = false;
 							view.enableSendButton(false);
 						}
 					}
@@ -170,13 +173,13 @@ public class BoardComposite extends Composite implements PaintListener,
 		}
 	}
 
-	private void changeSelectedRegion(Region region, boolean selected) {
+	private void changeSelectedRegion(Rectangle rec, boolean selected) {
 		if (selected) {
 			gc.setBackground(BLUE);
 		} else {
 			gc.setBackground(RED);
 		}
-		gc.fillOval(region.getBounds().x, region.getBounds().y, region.getBounds().width, region.getBounds().height);
+		gc.fillOval(rec.x, rec.y, rec.width, rec.height);
 	}
 
 	private boolean isTheSameCol(Point checkPoint, Point point) {
@@ -201,9 +204,9 @@ public class BoardComposite extends Composite implements PaintListener,
 
 	public void updateView(Board gameBoard) {
 		board = gameBoard;
-		System.out.println("==============");
-		System.out.println(board);
-		System.out.println("==============");
+//		System.out.println("==============");
+//		System.out.println(board);
+//		System.out.println("==============");
 		maxXsize = board.getSize();
 		maxYsize = board.getMaxColSize();
 		enablePoints.clear();
@@ -228,31 +231,58 @@ public class BoardComposite extends Composite implements PaintListener,
 	}
 
 	public void showResult(boolean b) {
-		view.enableReadyButton(true);
+		Font font = new Font(Display.getDefault(), "Tahoma", 18, SWT.BOLD);
+        gc.setFont(font);
+
+        String text = null;
+		int cliWidth = getClientArea().width;
+		int cliHeight = getClientArea().height;
 		if (b) {
-			gc.setBackground(WHITE);
-			gc.fillRectangle(0, 0, this.width, this.height);
+			setGc(WHITE, RED, 180, cliWidth, cliHeight);
+			text = "WIN!!!";
 		} else {
-			gc.setBackground(BACKGROUND);
-			gc.fillRectangle(0, 0, this.width, this.height);
+			setGc(BACKGROUND, BLUE, 180, cliWidth, cliHeight);
+			text = "WIN?";
 		}
+		Point textSize = gc.textExtent(text);
+		gc.drawText(text, (canvas.getSize().x - textSize.x)/2, (canvas.getSize().y - textSize.y)/2);
+		view.enableReadyButton(true);
+		view.enableAutoButton(false);
+		view.enablePassButton(false);
+		view.enableSendButton(false);
+	}
+
+	private void setGc(Color back, Color fore, int alpha, int width, int height) {
+		gc.setBackground(back);
+		gc.setForeground(fore);
+		gc.setAlpha(alpha);
+		gc.fillRectangle(0, 0, width, height);
 	}
 
 	public Set<Point> getSelectedPoint() {
 		return selectedPoints.keySet();
 	}
 
-	public void showBest(Board changedBoard) {
-		Board tempBoard = board;
-		board = changedBoard;
-		canvasRedraw();
-		board = tempBoard;
-	}
+//	public void showBest(Board changedBoard) {
+//		Board tempBoard = board;
+//		board = changedBoard;
+//		canvasRedraw();
+//		board = tempBoard;
+//	}
 
 	public void showBest(int deleteIndex, int deleteCount) {
-		Board tempBoard = new Board(board.getBoard());
+		if (deleteCount > 0)
+			changed = true;
 		board.switchAt(deleteIndex, deleteCount);
 		canvasRedraw();
+	}
+
+	public boolean isChanged() {
+		return changed;
+	}
+
+	public void setChanged(boolean changed) {
+		this.changed = changed;
 	}
 
 }

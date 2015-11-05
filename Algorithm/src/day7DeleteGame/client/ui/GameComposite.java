@@ -46,6 +46,7 @@ public class GameComposite extends Composite implements PaintListener,
 	protected ClientViewHandler clientViewHandler;
 	private int maxXsize;
 	private int maxYsize;
+	private List<Rectangle> recs = new ArrayList<Rectangle>();
 
 	public GameComposite(Composite parent, ClientViewHandler clientViewHandler) {
 		super(parent, SWT.NONE);
@@ -83,6 +84,7 @@ public class GameComposite extends Composite implements PaintListener,
 				Region region = new Region();
 				region.add(rec);
 				regions.add(region);
+				recs .add(rec);
 				if (element.equals(Boolean.TRUE)) {
 					Point enable = new Point(col, row);
 					enablePoints.put(enable, Boolean.TRUE);
@@ -97,6 +99,8 @@ public class GameComposite extends Composite implements PaintListener,
 //						rec.height, element.booleanValue());
 			}
 		}
+		
+		System.out.println("selected: "+selectedPoints);
 	}
 
 	private int getX(int col) {
@@ -118,10 +122,11 @@ public class GameComposite extends Composite implements PaintListener,
 	@Override
 	public void mouseDown(MouseEvent e) {
 		boolean find = false;
-		for (Region region : regions) {
-			if (region.getBounds().contains(e.x, e.y)) {
-				int col = region.getBounds().x / getWidth();
-				int row = region.getBounds().y / getHight();
+//		for (Region region : regions) {
+		for (Rectangle rec : recs) {
+			if (rec.contains(e.x, e.y)) {
+				int col = rec.x / getWidth();
+				int row = rec.y / getHight();
 				Point checkPoint = new Point(col, row);
 				if (enablePoints.containsKey(checkPoint)) {
 					clientViewHandler.enableSendButton(true);
@@ -131,10 +136,10 @@ public class GameComposite extends Composite implements PaintListener,
 							if (!isTheSameCol(checkPoint, point))
 								return;
 						}
-						changeSelectedRegion(region, true);
+						changeSelectedRegion(rec, true);
 						selectedPoints.put(checkPoint, Boolean.FALSE);
 					} else {
-						changeSelectedRegion(region, false);
+						changeSelectedRegion(rec, false);
 						selectedPoints.remove(checkPoint);
 						if (selectedPoints.isEmpty()) {
 							clientViewHandler.enableSendButton(false);
@@ -145,10 +150,10 @@ public class GameComposite extends Composite implements PaintListener,
 					return;
 			}
 		}
-		// System.out.println(selectedPoints);
+		 System.out.println(selectedPoints);
 	}
 
-	private void changeSelectedRegion(Region region, boolean selected) {
+	private void changeSelectedRegion(Rectangle rec, boolean selected) {
 		if (selected) {
 //			gc.setForeground(RED);
 			gc.setBackground(BLUE);
@@ -164,7 +169,7 @@ public class GameComposite extends Composite implements PaintListener,
 //					region.getBounds().y, region.getBounds().width,
 //					region.getBounds().height, true);
 		}
-		gc.fillRectangle(region.getBounds());
+		gc.fillRectangle(rec);
 	}
 
 	private boolean isTheSameCol(Point checkPoint, Point point) {

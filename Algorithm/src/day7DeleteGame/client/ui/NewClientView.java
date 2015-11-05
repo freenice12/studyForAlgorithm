@@ -2,13 +2,11 @@ package day7DeleteGame.client.ui;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.MessageListener;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -16,10 +14,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import common.model.UserInfo;
+
 import day7DeleteGame.client.BoardHandler;
 import day7DeleteGame.client.GameClientMessageHandler;
 import day7DeleteGame.client.GameClientTopicHandler;
-import day7DeleteGame.model.Board;
 
 public class NewClientView {
 
@@ -29,14 +27,13 @@ public class NewClientView {
 	protected Display display;
 	protected Shell shell;
 	protected Composite mainComposite;
-	protected LeftComposite left;
+	protected LeftComposite leftComposite;
 	protected BoardComposite boardComposite;
 	protected StatusComposite statusComposite;
 	protected ButtonsComposite buttonsComposite;
 	protected GameClientMessageHandler messageHandler;
 	protected GameClientTopicHandler topicHandler;
 	protected BoardHandler helper;
-	protected boolean canPass;
 
 	public NewClientView(GameClientMessageHandler gameClientMessageHandler) {
 		this.messageHandler = gameClientMessageHandler;
@@ -46,6 +43,29 @@ public class NewClientView {
 
 	public void setTopicHandler(MessageListener gameClientTopicHandler) {
 		this.topicHandler = (GameClientTopicHandler) gameClientTopicHandler;
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				sendHeartBeat();
+				display.timerExec(20000, this);
+			}
+		};
+
+		// Launch the timer
+		display.timerExec(1000, runnable);
+		// display.asyncExec(new Runnable() {
+		// @Override
+		// public void run() {
+		// Runnable runnable = new Runnable() {
+		// @Override
+		// public void run() {
+		// sendHeartBeat();
+		// display.timerExec(10000, this);
+		// }
+		// };
+		// Display.getCurrent().timerExec(1000, runnable);
+		// }
+		// });
 	}
 
 	public void init() {
@@ -69,7 +89,7 @@ public class NewClientView {
 	}
 
 	private void createLeftComposite() {
-		left = new LeftComposite(this);
+		leftComposite = new LeftComposite(this);
 	}
 
 	private void createRightComposite() {
@@ -79,12 +99,6 @@ public class NewClientView {
 	}
 
 	private void start() {
-		// boardComposite.updateView(Board.getInstance());
-		// List<UserInfo> clients = new ArrayList<UserInfo>();
-		// clients.add(new UserInfo(UUID.randomUUID(), "user1"));
-		// clients.add(new UserInfo(UUID.randomUUID(), "tester2"));
-		// clients.add(new UserInfo(UUID.randomUUID(), "na3"));
-		// statusComposite.setClientsLabel("", clients);
 		shell.setSize(WIDTH, HEIGHT);
 		shell.open();
 		while (!shell.isDisposed()) {
@@ -92,6 +106,17 @@ public class NewClientView {
 				display.sleep();
 		}
 		display.dispose();
+	}
+
+	public void sendHeartBeat() {
+		if (topicHandler.startHeartbeat()) {
+			topicHandler.sendHeartbeat();
+		}
+		leftComposite.redraw();
+		boardComposite.redraw();
+		statusComposite.redraw();
+		buttonsComposite.redraw();
+		
 	}
 
 	public void updateStatus(final String string,
@@ -200,20 +225,18 @@ public class NewClientView {
 			}
 		});
 	}
-	
-		
 
-//	public List<List<Boolean>> sendPoint(Set<Point> selectedPoints,
-//			boolean isAuto, boolean canPass) {
-//		return helper.getModifiedBoard(selectedPoints, isAuto, canPass);
-//	}
-//
-//	public void sendSelectedPoint(boolean isAuto) {
-//		topicHandler.sendPoints(boardComposite.getSelectedPoint(), isAuto);
-//	}
+	// public List<List<Boolean>> sendPoint(Set<Point> selectedPoints,
+	// boolean isAuto, boolean canPass) {
+	// return helper.getModifiedBoard(selectedPoints, isAuto, canPass);
+	// }
+	//
+	// public void sendSelectedPoint(boolean isAuto) {
+	// topicHandler.sendPoints(boardComposite.getSelectedPoint(), isAuto);
+	// }
 
 	public void showBest() {
-		if (helper.findAnswer(canPass))
+		if (helper.findAnswer(buttonsComposite.canPass))
 			boardComposite.showBest(helper.deleteIndex, helper.deleteCount);
 	}
 
@@ -226,4 +249,23 @@ public class NewClientView {
 		topicHandler.sendPass(helper.getBoard());
 	}
 
+	public void sendGiveup() {
+		topicHandler.sendGiveup();
+	}
+
+	public void enableGiveupButton(boolean b) {
+		buttonsComposite.enableGiveupButton(b);
+	}
+
+	public boolean getCanPass() {
+		return buttonsComposite.canPass;
+	}
+	
+	public void setCanPass(boolean b) {
+		buttonsComposite.setCanPass(b);
+	}
+
+	public void initStatus() {
+		statusComposite.initUserInfo();
+	}
 }

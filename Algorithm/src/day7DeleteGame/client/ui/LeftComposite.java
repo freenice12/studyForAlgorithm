@@ -18,8 +18,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import common.message.HeartBeatRequestMessage;
 import common.message.InitRequestMessage;
+
 import day7DeleteGame.client.GameClientTopicHandler;
 import day7DeleteGame.util.ActivemqConnector;
 
@@ -173,7 +173,6 @@ public class LeftComposite extends Composite {
 				connector.setTopicHandler(new GameClientTopicHandler(connector, view));
 				view.messageHandler.setTopicHandler(connector.getTopicHandler());
 				view.setTopicHandler(connector.getTopicHandler());
-				connector.sendTempMessage(new HeartBeatRequestMessage(view.uuid));
 				connector.sendTempMessage(new InitRequestMessage(view.uuid,textMap.get(NAME).getText()));
 			}
 			

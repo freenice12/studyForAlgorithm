@@ -26,7 +26,7 @@ public class ClientViewHandler {
 	private ButtonComposite buttonComposite;
 	private GameClientTopicHandler clientHandler;
 	private String userId;
-	private boolean reGame;
+//	private boolean reGame;
 	
 	public ClientViewHandler(GameClientTopicHandler clientHandler) {
 		this.clientHandler = clientHandler;
@@ -87,6 +87,9 @@ public class ClientViewHandler {
 
 	public void sendPoints(Set<Point> selectedPoints, boolean isAuto) {
 //		clientHandler.sendPoints(selectedPoints);
+		if (isAuto)
+			selectedPoints.clear();
+		gameComposite.update();
 	}
 
 	public void pointRepoInit() {
@@ -100,7 +103,7 @@ public class ClientViewHandler {
 	public void showResult(UUID clientUUID, UUID otherClientUUID) {
 		gameComposite.showResult(clientUUID.equals(otherClientUUID));
 		buttonComposite.setEnableReadyButton(true);
-		reGame = true;
+//		reGame = true;
 	}
 
 	public void enableAutoButton(boolean b) {

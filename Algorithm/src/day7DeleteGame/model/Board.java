@@ -14,12 +14,11 @@ public class Board implements Serializable {
 	private int maxColNum;
 	private boolean isFinish;
 	
-	private Board() {
-		lines.add(new BoardLine(6));
-		lines.add(new BoardLine(2));
-		lines.add(new BoardLine(9));
-//		lines.get(0).switchStateAt(2);
-	}
+//	private Board() {
+//		lines.add(new BoardLine(1));
+//		lines.add(new BoardLine(1));
+//		lines.add(new BoardLine(3));
+//	}
 	
 	private Board(int count) {
 		for (int i = 0; i < count; i++) {
@@ -49,16 +48,20 @@ public class Board implements Serializable {
 	
 	public static Board getInstance() {
 		if (instance == null) {
-//			instance = new Board(random.nextInt(limit)+5);
-			instance = new Board();
+			instance = new Board(random.nextInt(limit)+5);
+//			instance = new Board();
 		}
 		return instance;
 	}
-	
-	public static Board initInstance() {
-		instance = new Board(random.nextInt(limit)+5);
+	public static Board getNewInstance() {
+			instance = new Board(random.nextInt(limit)+5);
 		return instance;
 	}
+	
+//	public static Board initInstance() {
+//		instance = new Board(random.nextInt(limit)+5);
+//		return instance;
+//	}
 	
 	public int getTrueColumnSize() {
 		int result = 0;
@@ -191,13 +194,24 @@ public class Board implements Serializable {
 			if (line.getTrueSize() != 0)
 				count++;
 		}
-		if (count == 2 && getOneCount() == 1) {
+		if (count == 2 && getOneCount() > 0) {
 			for (BoardLine line : lines) {
 				if (line.getTrueSize() > 1) {
 					line.switchState(line.getTrueSize());
 					break;
 				}
 			}
+		} 
+		if (count == 2 && getOneCount() == 2) {
+			for (BoardLine line : lines) {
+				if (line.getTrueSize() == 1) {
+					line.switchState(line.getTrueSize());
+					break;
+				}
+			}
+		}
+		if (count == 3 && getOneCount() > 1) {
+			switchAt(getMaxColNum(), getMaxColSize() - 1);
 		}
 	}
 	

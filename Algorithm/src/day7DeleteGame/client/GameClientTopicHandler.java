@@ -3,7 +3,6 @@ package day7DeleteGame.client;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.jms.JMSException;
@@ -11,15 +10,14 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.ObjectMessage;
 
-import org.eclipse.swt.graphics.Point;
-
+import common.message.GiveUpRequestMessage;
+import common.message.HeartBeatRequestMessage;
 import common.message.ReadyRequestMessage;
 import common.message.SubmitRequestMessage;
 import common.message.topic.EndTopicMessage;
 import common.message.topic.StartTopicMessage;
 import common.message.topic.TurnTopicMessage;
 import common.model.UserInfo;
-
 import day7DeleteGame.client.ui.NewClientView;
 import day7DeleteGame.util.ActivemqConnector;
 
@@ -29,7 +27,8 @@ public class GameClientTopicHandler implements MessageListener{
 //	private GameMapHandler mapHandler;
 	private ActivemqConnector connector;
 	private Map<UUID, UserInfo> clients;
-	private boolean canPass = true;
+	private boolean heartbeat;
+	private boolean isNewGame;
 	
 	public GameClientTopicHandler(ActivemqConnector conn, NewClientView view) {
 		this.connector = conn;
@@ -64,10 +63,12 @@ public class GameClientTopicHandler implements MessageListener{
 	}
 
 	private void continueGame(Object messageObj) {
+		heartbeat = true;
 		view.updateView(((TurnTopicMessage) messageObj).getMapList());
 		String next = getNext(((TurnTopicMessage) messageObj).getCurrentTurnUUID());
 		if (next != null) {
-			view.updateInfo(((TurnTopicMessage) messageObj).getTurnCount());
+			int turnCount = ((TurnTopicMessage) messageObj).getTurnCount();
+			view.updateInfo(turnCount);
 			view.updateStatus(next, clients.values());
 		}
 		controlButtons(next);
@@ -75,15 +76,17 @@ public class GameClientTopicHandler implements MessageListener{
 
 	public void controlButtons(String next) {
 		if (next != null && next.equals(clients.get(view.uuid).getName())) {
+			view.enableGameComposite(true);
 			view.enableAutoButton(true);
-			if (canPass) {
+			view.enableGiveupButton(true);
+			if (view.getCanPass()) {
 				view.enablePassButton(true);
 			}
-			view.enableGameComposite(true);
 		} else {
 			view.enableSendButton(false);
 			view.enableAutoButton(false);
 			view.enablePassButton(false);
+			view.enableGiveupButton(false);
 			view.enableGameComposite(false);
 		}
 	}
@@ -96,6 +99,7 @@ public class GameClientTopicHandler implements MessageListener{
 	}
 	
 	public void sendReady() {
+		isNewGame = true;
 		connector.sendTempMessage(new ReadyRequestMessage(view.uuid));
 	}
 
@@ -115,7 +119,7 @@ public class GameClientTopicHandler implements MessageListener{
 			SubmitRequestMessage object = new SubmitRequestMessage(view.uuid, maps);
 			connector.sendTempMessage(object);
 		}
-		this.canPass = false;
+//		this.canPass = false;
 	}
 
 	public String getTurn(UUID uuid) {
@@ -123,8 +127,8 @@ public class GameClientTopicHandler implements MessageListener{
 	}
 
 	public void sendPass(List<List<Boolean>> maps) {
-		if (canPass) {
-			canPass = false;
+		if (view.getCanPass()) {
+//			canPass = false;
 			SubmitRequestMessage object = new SubmitRequestMessage(view.uuid, maps);
 			object.setPass();
 			connector.sendTempMessage(object);
@@ -134,8 +138,30 @@ public class GameClientTopicHandler implements MessageListener{
 	private void endGame(Object messageObj) {
 		if (((EndTopicMessage) messageObj).getWinnerIDList().contains(clients.get(view.uuid).getName())) {
 			view.showResult(true);
-		} else
+		} else {
 			view.showResult(false);
+		}
+		heartbeat = false;
+		isNewGame = false;
+		view.initStatus();
+		view.setCanPass(true);
+	}
+
+	public void sendGiveup() {
+		GiveUpRequestMessage object = new GiveUpRequestMessage(view.uuid);
+		connector.sendTempMessage(object);
+	}
+	
+	public void sendHeartbeat() {
+		connector.sendTempMessage(new HeartBeatRequestMessage(view.uuid));
+	}
+
+	public boolean startHeartbeat() {
+		return heartbeat;
+	}
+	
+	public boolean getIsNewGame() {
+		return isNewGame;
 	}
 
 //	public void sendInit() {

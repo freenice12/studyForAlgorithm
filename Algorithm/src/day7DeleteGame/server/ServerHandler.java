@@ -20,7 +20,6 @@ import common.message.HeartBeatResponseMessage;
 import common.message.InitRequestMessage;
 import common.message.InitResponseMessage;
 import common.message.PassRequestMessage;
-import common.message.PassResponseMessage;
 import common.message.ReadyRequestMessage;
 import common.message.ReadyResponseMessage;
 import common.message.SubmitRequestMessage;
@@ -29,6 +28,7 @@ import common.message.topic.EndTopicMessage;
 import common.message.topic.StartTopicMessage;
 import common.message.topic.TurnTopicMessage;
 import common.model.UserInfo;
+
 import day7DeleteGame.model.Board;
 import day7DeleteGame.util.ActivemqConnector;
 
@@ -40,7 +40,7 @@ public class ServerHandler implements MessageListener {
 	private int turn;
 	private Map<UUID, UserInfo> clientMap = new LinkedHashMap<UUID, UserInfo>();
 	private GameManager gameManager = new GameManager();
-	private List<UUID> giveupUser = new ArrayList<>();
+	private Map<UUID, UserInfo> giveupUsers = new LinkedHashMap<UUID, UserInfo>();
 	private List<List<Boolean>> recentMap;
 
 	public ServerHandler(ActivemqConnector connector) {
@@ -57,7 +57,7 @@ public class ServerHandler implements MessageListener {
 				ready(messageObj, jmsReplyTo);
 			} else if (messageObj instanceof ReadyRequestMessage) {
 				System.out.println("get ReadyRequestMessage");
-				start(jmsReplyTo);
+				start(messageObj, jmsReplyTo);
 			} else if (messageObj instanceof SubmitRequestMessage) {
 				System.out.println("get SubmitRequestMessage");
 				continueGame(messageObj, jmsReplyTo);
@@ -66,7 +66,8 @@ public class ServerHandler implements MessageListener {
 				addPassedClient(messageObj, jmsReplyTo);
 			} else if (messageObj instanceof HeartBeatRequestMessage) {
 				System.out.println("get HeartBeatRequestMessage");
-				conn.sendReplyTo(jmsReplyTo, new HeartBeatResponseMessage(false, ""));
+				conn.sendReplyTo(jmsReplyTo, new HeartBeatResponseMessage(
+						false, ""));
 			} else if (messageObj instanceof GiveUpRequestMessage) {
 				System.out.println("get GiveUpRequestMessage");
 				manageClient(messageObj, jmsReplyTo);
@@ -89,30 +90,42 @@ public class ServerHandler implements MessageListener {
 	}
 
 	private void continueGame(Object messageObj, Destination jmsReplyTo) {
-		recentMap = ((SubmitRequestMessage) messageObj).getList();
+		SubmitRequestMessage submitRequestMessage = (SubmitRequestMessage) messageObj;
+		recentMap = submitRequestMessage.getList();
 		Board board = new Board(recentMap);
 		boolean isFinish = board.isFinish();
-//		System.out.println("isFinish? " + isFinish);
-		if (((SubmitRequestMessage) messageObj).isPass()) {
+		// System.out.println("isFinish? " + isFinish);
+		if (submitRequestMessage.isPass()) {
 			if (!addPassedClient(messageObj, jmsReplyTo))
 				return;
 		}
 		sendTurnTopic(board.getBoard(), isFinish);
-		gameManager.saveHistory(turn, ((SubmitRequestMessage) messageObj));
+		gameManager.saveHistory(turn, submitRequestMessage);
 		if (isFinish) {
-			init();
-			List<String> winner = new ArrayList<String>();
-			for (Entry<UUID, UserInfo> entry : clientMap.entrySet()) {
-				if (entry.getKey().equals(((SubmitRequestMessage) messageObj).getUuid()))
-					continue;
-				winner.add(entry.getValue().getName());
-			}
-			conn.sendTopic(new EndTopicMessage(winner));
+			sendWinner(submitRequestMessage.getUuid());
 		}
+	}
+	
+	private void sendWinner() {
+		sendWinner(UUID.randomUUID());
+	}
+
+
+	private void sendWinner(UUID client) {
+		List<String> winner = new ArrayList<String>();
+		for (Entry<UUID, UserInfo> entry : clientMap.entrySet()) {
+			giveupUsers.put(entry.getKey(), entry.getValue());
+			if (entry.getKey().equals(client))
+				continue;
+			winner.add(entry.getValue().getName());
+		}
+		System.out.println("Winner: "+winner);
+		conn.sendTopic(new EndTopicMessage(winner));
+		init();
 	}
 
 	private void init() {
-		Board.initInstance().getBoard();
+		Board.getNewInstance();
 		count = 0;
 		turn = 0;
 		readyCount = 0;
@@ -120,9 +133,20 @@ public class ServerHandler implements MessageListener {
 		gameManager = new GameManager();
 	}
 
-	private void start(Destination jmsReplyTo) {
+	private void start(Object messageObj, Destination jmsReplyTo) {
 		conn.sendReplyTo(jmsReplyTo, new ReadyResponseMessage(true, ""));
+		handleClient((ReadyRequestMessage)messageObj);
 		handleReadyMessage();
+	}
+
+	private void handleClient(ReadyRequestMessage messageObj) {
+		UUID uuid = messageObj.getUuid();
+		UserInfo info = giveupUsers.get(uuid);
+		if (info != null) {
+			count++;
+			clientMap.put(uuid, info);
+			giveupUsers.remove(uuid);
+		}
 	}
 
 	private void ready(Object messageObj, Destination jmsReplyTo) {
@@ -131,7 +155,8 @@ public class ServerHandler implements MessageListener {
 		String userId = ((InitRequestMessage) messageObj).getUserID();
 		for (Entry<UUID, UserInfo> entry : clientMap.entrySet()) {
 			if (entry.getValue().getName().equals(userId)) {
-				conn.sendReplyTo(jmsReplyTo, new InitResponseMessage(false, "Can not use \""+userId+"\""));
+				conn.sendReplyTo(jmsReplyTo, new InitResponseMessage(false,
+						"Can not use \"" + userId + "\""));
 				count--;
 				return;
 			}
@@ -144,12 +169,13 @@ public class ServerHandler implements MessageListener {
 
 	private void handleReadyMessage() {
 		readyCount++;
-		if (readyCount > 1 && count == readyCount) {
-			// System.out.println(Board.getInstance());
-			gameManager.saveHistory(turn, new SubmitRequestMessage(null, Board
-					.getInstance().getBoard()));
+		if (readyCount > 1 && clientMap.size() == readyCount) {
+			giveupUsers.clear();
+			recentMap = Board.getInstance().getBoard();
+			gameManager.saveHistory(turn, new SubmitRequestMessage(null,
+					recentMap));
 			conn.sendTopic(new StartTopicMessage(clientMap));
-			sendTurnTopic(Board.getInstance().getBoard(), false);
+			sendTurnTopic(recentMap, false);
 		}
 	}
 
@@ -162,7 +188,8 @@ public class ServerHandler implements MessageListener {
 	private UUID getNextClient(boolean isFinish) {
 		if (isFinish)
 			return UUID.randomUUID();
-		int next = turn % clientMap.size();
+
+		int next = (turn - giveupUsers.size()) % clientMap.size();
 		int index = 0;
 		for (Entry<UUID, UserInfo> entry : clientMap.entrySet()) {
 			if (next == index) {
@@ -175,10 +202,16 @@ public class ServerHandler implements MessageListener {
 
 	private void manageClient(Object messageObj, Destination jmsReplyTo) {
 		UUID uuid = ((GiveUpRequestMessage) messageObj).getUuid();
-		giveupUser.add(uuid);
+		UserInfo userInfo = clientMap.get(uuid);
+		giveupUsers.put(uuid, userInfo);
 		clientMap.remove(uuid);
+		
 		conn.sendReplyTo(jmsReplyTo, new GiveUpResponseMessage(true, ""));
-		sendTurnTopic(recentMap, false);
+		if (clientMap.size() < 2) {
+			sendWinner();
+		} else {
+			sendTurnTopic(recentMap, false);
+		}
 	}
-	
+
 }

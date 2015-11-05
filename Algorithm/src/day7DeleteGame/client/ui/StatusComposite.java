@@ -15,7 +15,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Label;
 
 import common.model.UserInfo;
 
@@ -30,7 +29,7 @@ public class StatusComposite extends Composite implements PaintListener {
 	private GC gc;
 	private String nextId;
 	private List<UserInfo> userInfos = new ArrayList<>();
-	private List<Label> clientsLabel = new ArrayList<>();
+//	private List<Label> clientsLabel = new ArrayList<>();
 	private int turn;
 
 	StatusComposite(NewClientView clientView) {
@@ -50,32 +49,32 @@ public class StatusComposite extends Composite implements PaintListener {
 		createStateContent();
 	}
 	
-	public void setClientsLabel(final String id, Collection<UserInfo> clients) {
-		if (id.isEmpty()) {
-			userInfos.addAll(clients);
-			return;
-		}
-		int index = 0;
-		for (final UserInfo client : clients) {
-			final Label clientLabel = clientsLabel.get(index++);
-			Display.getDefault().syncExec(new Runnable() {
-
-				@Override
-				public void run() {
-					clientLabel.setAlignment(SWT.CENTER);
-					clientLabel.setText(client.getName());
-					if (id.equals(client)) {
-						clientLabel.setForeground(getDisplay().getSystemColor(
-								SWT.COLOR_RED));
-					} else {
-						clientLabel.setForeground(getDisplay().getSystemColor(
-								SWT.COLOR_BLACK));
-					}
-				}
-			});
-		}
-		canvas.update();
-	}
+//	public void setClientsLabel(final String id, Collection<UserInfo> clients) {
+//		if (id.isEmpty()) {
+//			userInfos.addAll(clients);
+//			return;
+//		}
+//		int index = 0;
+//		for (final UserInfo client : clients) {
+//			final Label clientLabel = clientsLabel.get(index++);
+//			Display.getDefault().syncExec(new Runnable() {
+//
+//				@Override
+//				public void run() {
+//					clientLabel.setAlignment(SWT.CENTER);
+//					clientLabel.setText(client.getName());
+//					if (id.equals(client)) {
+//						clientLabel.setForeground(getDisplay().getSystemColor(
+//								SWT.COLOR_RED));
+//					} else {
+//						clientLabel.setForeground(getDisplay().getSystemColor(
+//								SWT.COLOR_BLACK));
+//					}
+//				}
+//			});
+//		}
+//		canvas.update();
+//	}
 	
 	private int getMaxWidth() {
 		int max = 0;
@@ -103,9 +102,6 @@ public class StatusComposite extends Composite implements PaintListener {
 				paintevent.gc.setForeground(BLACK);
 				
 			Point textSize = paintevent.gc.textExtent(info.getName());
-//			if (x == 0)
-//				x += indent;
-//			else
 			x += getMaxWidth()+indent;
 			y = (canvas.getClientArea().height - textSize.y)/2;
 			paintevent.gc.drawString(info.getName(), x, y);
@@ -147,7 +143,7 @@ public class StatusComposite extends Composite implements PaintListener {
 	}
 
 	private void canvasRedraw() {
-		Display.getDefault().asyncExec(new Runnable() {
+		Display.getDefault().syncExec(new Runnable() {
 			
 			@Override
 			public void run() {
@@ -159,6 +155,10 @@ public class StatusComposite extends Composite implements PaintListener {
 	public void updateTurn(int turnCount) {
 		turn = turnCount;
 		canvasRedraw();
+	}
+	
+	public void initUserInfo() {
+		userInfos.clear();
 	}
 
 }

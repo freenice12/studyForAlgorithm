@@ -68,15 +68,23 @@ public class BoardHandler implements GameMapHandler {
 		// [21,11,18]
 		List<Integer> numArray = board.getTrueSizeArray();
 
-		if (canFinish(numArray)) {
+		boolean hasSolution = true;
+		
+		int remainLines = getRemainLines(numArray);
+		if (remainLines == 1) {
+			if (board.getMaxColSize() > 1)
+				board.switchAt(board.getMaxColNum(), board.getMaxColSize() - 1);
+			else 
+				board.switchAt(board.getMaxColNum(), board.getMaxColSize());
+		} else if (remainLines == 2 && board.getOneCount() > 0) {
 			board.switchOtherLine();
-			return true;
+		} else if (remainLines == 3) {
+			board.switchOtherLine();
 		}
 
-		if (findBestSelection(canPass, numArray))
-			return true;
-		return false;
-
+		if (!findBestSelection(canPass, numArray)) 
+			hasSolution = false;
+		return hasSolution;
 	}
 
 	private boolean findBestSelection(boolean canPass, List<Integer> numArray) {
@@ -94,7 +102,7 @@ public class BoardHandler implements GameMapHandler {
 
 		findIndexAndCount();
 
-		if (deleteCount == 0)
+		if (deleteCount == 0 && !canPass)
 			return false;
 		return true;
 //		if (modifyBoard(canPass))
@@ -131,15 +139,18 @@ public class BoardHandler implements GameMapHandler {
 	}
 
 	@SuppressWarnings("boxing")
-	private boolean canFinish(List<Integer> numArray) {
+	private int getRemainLines(List<Integer> numArray) {
 		int count = 0;
 		for (Integer num : numArray) {
 			if (num != 0)
 				count++;
 		}
-		if (count == 2 && board.getOneCount() == 1)
-			return true;
-		return false;
+		return count;
+//		if (count == 2 && board.getOneCount() == 1)
+//			return true;
+//		else if (count == 1)
+//			return true;
+//		return false;
 	}
 
 	@SuppressWarnings("boxing")
