@@ -16,6 +16,7 @@ public class Finder {
 				result = inputCharList.get(j);
 				if (!sub.contains(result)) {
 					System.out.println("result: "+result);
+					return;
 				}
 			}
 		}
