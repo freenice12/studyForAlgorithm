@@ -43,4 +43,4 @@ Algorithm!
 # exDay
 * Fibonacci Sequence
 * [IOError](https://code.google.com/codejam/contest/9214486/dashboard)
-* Find repeating decimal (ex: 1/3 => 3, 1/7 => 142857 ...)
+* Find repeating decimal (ex: 1/3 => 3, 1/7 => 142857, ...)
