@@ -1,4 +1,3 @@
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +14,17 @@ public class RepeatingDecimalFinder {
     static class Finder {
         public static void findAndPrint(final int fromIn, final int toEx) {
             IntStream.range(fromIn, toEx).filter(hasRepeatingDecimal()).forEach(
-                    number -> print(cal(new ArrayList<>(), 1, number, 0)));
+            		divisor -> print(divisor, startTracking(new ArrayList<>(), 1, divisor)));
         }
 
-        private static void print(final String result) {
-            System.out.println("result: " + result);
+        private static void print(final int divisor, final String result) {
+            System.out.println(divisor + ": " + result);
         }
 
         private static IntPredicate hasRepeatingDecimal() {
-            return targetNumber -> {
+            return divisor -> {
                 try {
-                    new BigDecimal(1.0).divide(new BigDecimal(targetNumber));
+                    new BigDecimal(1.0).divide(new BigDecimal(divisor));
                     return false;
                 } catch (final Exception e) {
                     return true;
@@ -33,91 +32,92 @@ public class RepeatingDecimalFinder {
             };
         }
 
-        private static String cal(final List<History> histories, int c,
-                final int a, final int counter) {
-            c = c * 10;
-            if (a > c) {
-                final Optional<String> findRepeater = findRepeater(histories,
-                        0);
-                if (findRepeater.isPresent()) {
-                    return findRepeater.get();
+        private static String startTracking(final List<DecimalTracker> trackers, int dividend,
+                final int divisor) {
+            dividend = dividend * 10;
+            if (divisor > dividend) {
+                final Optional<String> optionalRepeater = findRepeaterAfterAddQuotient(trackers, 0);
+                if (optionalRepeater.isPresent()) {
+                    return optionalRepeater.get();
                 }
-                return cal(histories, c, a, counter + 1);
+                return startTracking(trackers, dividend, divisor);
             }
-            final int b = c / a;
-            final Optional<String> findRepeater = findRepeater(histories, b);
-            if (findRepeater.isPresent()) {
-                return findRepeater.get();
+            final int quotient = dividend / divisor;
+            final Optional<String> optionalRepeater = findRepeaterAfterAddQuotient(trackers, quotient);
+            if (optionalRepeater.isPresent()) {
+                return optionalRepeater.get();
             }
 
-            return cal(histories, c - b * a, a, counter + 1);
+            return startTracking(trackers, dividend - quotient * divisor, divisor);
         }
 
-        private static Optional<String> findRepeater(
-                final List<History> histories, final int b) {
-            addHistoryWith(histories, b);
-            for (int i = 0; i < histories.size(); i++) {
-                final History h = addAnotherHistoryWithClean(histories, i, b);
-                if (h.checkRepeat())
-                    return Optional.of(h.getRepeater());
+        private static Optional<String> findRepeaterAfterAddQuotient(
+                final List<DecimalTracker> trackers, final int quotient) {
+            addTrackerWithQuotient(trackers, quotient);
+            for (int ith = 0; ith < trackers.size(); ith++) {
+                final DecimalTracker tracker = addAnotherHistoryWithClean(trackers, ith, quotient);
+                if (tracker.hasRepeat()) {
+					return Optional.of(tracker.getRepeater());
+				}
             }
             return Optional.empty();
         }
 
-        private static History addAnotherHistoryWithClean(
-                final List<History> histories, final int ith,
-                final int number) {
-            final History h = histories.get(ith);
-            h.deleteStartZero();
-            if (ith != histories.size() - 1) {
-                h.add(number);
+        private static DecimalTracker addAnotherHistoryWithClean(
+                final List<DecimalTracker> trackers, final int ith,
+                final int quotient) {
+            final DecimalTracker tracker = trackers.get(ith);
+            tracker.deleteFirstZero();
+            if (ith != trackers.size() - 1) {
+                tracker.addQuotient(quotient);
             }
-            return h;
+            return tracker;
         }
 
-        private static void addHistoryWith(final List<History> histories,
-                final int number) {
-            final History history = new History();
-            history.add(number);
-            histories.add(history);
+        private static void addTrackerWithQuotient(final List<DecimalTracker> trackers,
+                final int quotient) {
+            final DecimalTracker tracker = new DecimalTracker();
+            tracker.addQuotient(quotient);
+            trackers.add(tracker);
         }
     }
 
-    static class History {
-        private List<Integer> tails = new ArrayList<>();
-        private int level;
+    static class DecimalTracker {
+        private final List<Integer> tails = new ArrayList<>();
+        private int gap;
 
-        public void add(final int b) {
-            tails.add(b);
+        public void addQuotient(final int quotient) {
+            tails.add(quotient);
         }
 
-        public boolean checkRepeat() {
-            if (tails.isEmpty())
-                return false;
-            checkLevel(tails.get(tails.size() - 1));
-            if (level > 0 && tails.size() > level * 2) {
-                for (int ith = 0; ith < level; ith++) {
-                    if (!isSameWith(ith, ith + level)) {
-                        level = 0;
+        public boolean hasRepeat() {
+            if (tails.isEmpty()) {
+				return false;
+			}
+            updateGap(tails.get(tails.size() - 1));
+            if (gap > 0 && tails.size() > gap * 2) {
+                for (int ith = 0; ith < gap; ith++) {
+                    if (!isSameWith(ith, ith + gap)) {
+                        gap = 0;
                         return false;
                     }
                 }
                 return true;
             }
-            level = 0;
+            gap = 0;
             return false;
         }
 
-        private boolean isSameWith(final int ith, final int nextIth) {
-            return tails.get(ith) == tails.get(nextIth);
+        private boolean isSameWith(final int ith, final int gapPlusIth) {
+            return tails.get(ith) == tails.get(gapPlusIth);
         }
 
-        private void checkLevel(final int targetNumber) {
+        private void updateGap(final int targetNumber) {
             if (!tails.isEmpty()) {
                 for (int ith = 0; ith < tails.size() / 2; ith++) {
                     if (isMatched(ith, targetNumber)) {
-                        level = tails.size() / 2;
-                        return;
+                        gap = tails.size() / 2;
+                        return ;
                     }
                 }
             }
@@ -128,18 +128,20 @@ public class RepeatingDecimalFinder {
         }
 
         public String getRepeater() {
-            final StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < level; i++) {
-                sb.append(tails.get(i));
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (int i = 0; i < gap; i++) {
+                stringBuilder.append(tails.get(i));
             }
-            return sb.toString();
+            return stringBuilder.toString();
         }
 
-        public void deleteStartZero() {
-            if (tails.isEmpty())
-                return;
-            if (tails.get(0) == 0)
-                tails.remove(0);
+        public void deleteFirstZero() {
+            if (tails.isEmpty()) {
+				return ;
+			}
+            if (tails.get(0) == 0) {
+				tails.remove(0);
+			}
         }
 
     }
