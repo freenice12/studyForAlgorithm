@@ -18,7 +18,7 @@ public class RepeatingDecimalFinder {
         }
 
         private static void print(final int divisor, final String result) {
-            System.out.println(divisor + ": " + result);
+            System.out.println(divisor + " " + result);
         }
 
         private static IntPredicate hasRepeatingDecimal() {
