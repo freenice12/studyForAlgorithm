@@ -43,6 +43,26 @@ public class Fibonacci {
 	}
 	
 	/*
+		Using memorization with recursive
+	*/
+	static long[] fiboTable;
+
+    	private static long fibo(final int counter) {
+	    if (counter <= 1) {
+	        fiboTable[counter] = 1;
+	        return 1;
+	    }
+
+	    if (fiboTable[counter] > 0) {
+	        return fiboTable[counter];
+	    }
+
+	    fiboTable[counter] = fibo(counter - 1) + fibo(counter - 2);
+	    return fiboTable[counter];
+        }
+	
+	
+	/*
 		This is the best. What I think.
 		FYI. I searched on the internet.
 		I have to learn think different way to solve something.
