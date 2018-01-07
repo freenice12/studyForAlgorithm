@@ -44,3 +44,43 @@ Algorithm!
 * Fibonacci Sequence
 * [IOError](https://code.google.com/codejam/contest/9214486/dashboard)
 * Find repeating decimal (ex: 1/3 => 3, 1/7 => 142857, ...)
+
+## Picture's title and sort problem
+* Given string like:
+  * rawTitle.extension, location, time
+  
+* It should be rename the title like below:
+  * from  
+: abc.jpg, A, 2013-09-04  
+: see.jpg, A, 2012-09-05
+  * to  
+: A1.jpg, A, 2012-09-05  
+: A2.jpg, A, 2013-09-04  
+
+* When the picture which same location is over 10  
+* Then title must be prefix 0 like '01' ~ '09' and 10 and so on.  
+
+* The result shoud be:
+> A1.jpg  
+> A2.jpg
+
+## Counting steps 1 & 2
+* Given String like:
+  * 011100
+  * It means number '28'
+  
+* Rule like below:
+  * even should be half
+  * odd should be minus 1
+  * until be zero. 
+  
+* ex) "0101"
+  * means 5
+  * 5 -> 4 (step 1 (-1))
+  * 4 -> 2 (step 2 (/2))
+  * 2 -> 1 (step 3 (/2))
+  * 1 -> 0 (step 4 (-1))
+  
+* result: 4
+
+> counting steps 2 should be shown file comment
