@@ -1,10 +1,7 @@
 package jpa.example.demo.algo;
 
-import org.springframework.util.StopWatch;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 /**
  * You are climbing a stair case. It takes n steps to reach to the top.
@@ -39,18 +36,9 @@ public class WRONGClimbingStairsNNNNNTimeExceed {
 //        System.out.println(solution.climbStairs(3) + " / " + 3);
 
         // check elapsed time
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start("A");
         System.out.println(solution.climbStairs(38) + " / " + 63245986);
-        stopWatch.stop();
-        stopWatch.start("B");
         System.out.println(solutionB.climbStairs(38) + " / " + 63245986);
-        stopWatch.stop();
-        stopWatch.start("C");
         System.out.println(solutionC.climbStairs(38) + " / " + 63245986);
-        stopWatch.stop();
-
-        System.out.println(stopWatch.prettyPrint());
     }
     static class Solution {
         // too slow
